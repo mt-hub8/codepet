@@ -1,0 +1,22 @@
+{
+  "id": "pomodoro-coach",
+  "name": "番茄钟教练",
+  "description": "一个未来用于专注和休息提醒的 Skill 示例。V0.0 不执行这个配置。",
+  "triggers": [
+    "用户开启专注时段",
+    "专注时段结束",
+    "休息时段结束"
+  ],
+  "promptTemplate": "请用简短、友好的方式提醒用户当前番茄钟状态，并给出一个下一步建议。",
+  "requiredTools": [
+    "local-reminder",
+    "desktop-notification"
+  ],
+  "permissions": {
+    "canReadTasks": false,
+    "canRunCommands": false,
+    "canAccessNetwork": false,
+    "description": "只允许读取当前提醒状态，不允许执行命令或访问网络。"
+  }
+}
+

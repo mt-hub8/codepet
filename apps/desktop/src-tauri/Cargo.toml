@@ -1,0 +1,17 @@
+[package]
+name = "codepet-desktop"
+version = "0.0.0"
+description = "CodePet 桌面应用"
+authors = ["CodePet contributors"]
+edition = "2021"
+
+[lib]
+name = "codepet_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+

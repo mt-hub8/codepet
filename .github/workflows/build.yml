@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  desktop:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm --filter @codepet/desktop build
+
+      # V0.0 暂时只验证前端构建。Tauri build 需要完整 Rust、系统依赖和签名/打包环境，
+      # 后续到 V0.6 Windows 安装包阶段再启用正式打包检查。
+      # - name: Build Tauri app
+      #   run: pnpm --filter @codepet/desktop tauri build
+
