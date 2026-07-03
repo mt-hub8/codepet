@@ -2,7 +2,7 @@
 
 CodePet 的版本链从轻量桌面骨架开始，逐步扩展到提醒、本地模型、外部 Agent 监控、多角色工作流和社区生态。
 
-## V0.0 Open Source Product Skeleton
+## V0.0 Open Source Product Skeleton（已完成）
 
 - 开源仓库骨架。
 - README。
@@ -10,7 +10,7 @@ CodePet 的版本链从轻量桌面骨架开始，逐步扩展到提醒、本地
 - 架构文档。
 - 扩展目录预留。
 
-## V0.1 Desktop Pet Shell MVP
+## V0.1 Desktop Pet Shell MVP（已完成）
 
 - 桌宠悬浮窗。
 - 拖动。
@@ -130,4 +130,3 @@ CodePet 的版本链从轻量桌面骨架开始，逐步扩展到提醒、本地
 - 角色模板分享。
 - Skill 分享。
 - 社区生态。
-
