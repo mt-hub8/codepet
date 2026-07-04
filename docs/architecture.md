@@ -138,17 +138,21 @@ http://localhost:11434/api
 
 提醒系统可以通过明确接口请求 AI 文案生成，但不能直接依赖 Ollama HTTP 细节。AI 生成的提醒文案只填入表单，必须由用户点击保存后才写入提醒配置。
 
-## 角色系统边界（V0.3.5）
+## 角色与宠物素材（V0.4.5）
 
-`characters/rolePresets.ts` 提供 4 个 UI 预设角色，仅用于首页和角色页展示：
+`characters/` 模块负责宠物素材导入与渲染：
 
-- 不含真实角色记忆。
-- 不含 Skill 绑定。
-- 不含共享记忆或角色融合。
-- 完整角色工作室在后续版本实现。
+- `petManifestParser`：解析 `pet.json`，补全默认 grid / animations。
+- `petAssetService` / `petAssetStorage`：导入、删除、设置当前宠物。
+- `SpritePetRenderer` / `ActivePetRenderer`：spritesheet 动画与桌宠联动。
+- `PetAssetLibraryPage`：宠物库 UI。
+
+Rust `pet_assets` 模块将文件复制到 `{app_data}/codepet/pets/<id>/`，元数据写入 `pet_assets` 表。`current_pet_id` 存在 `app_meta`。
+
+默认不内置第三方社区素材。用户自行确认版权。不上传导入素材。
 
 ## 外部 Agent 边界
 
 Codex / Cursor / Claude Code 适配器只负责构造命令和检测输出，不直接操作 UI，不自动确认权限，不自动执行 AI 生成的命令。用户可自定义 CLI 路径与等待确认关键词。未安装对应 CLI 时显示友好提示，应用不崩溃。
 
-Petdex 导入规划在 V0.4.5，宠物孵化提示词向导规划在 V0.4.6。
+宠物孵化提示词向导规划在 V0.4.6。AI 生成宠物规划在后续版本。

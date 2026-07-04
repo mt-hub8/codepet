@@ -1,9 +1,9 @@
-import { PetAvatar } from "../pet/PetAvatar";
+import { ActivePetRenderer } from "../characters/ActivePetRenderer";
 import { petStateLabels } from "../pet/petState";
 import { useApp } from "../app/AppProvider";
 
 export function PetStatusCard() {
-  const { displayedState, ollamaStatus, aiReady } = useApp();
+  const { displayedState, ollamaStatus, aiReady, currentPet } = useApp();
 
   const aiStatusText =
     ollamaStatus.status === "available"
@@ -17,9 +17,9 @@ export function PetStatusCard() {
   return (
     <section className="cp-card pet-status-card" aria-label="桌宠状态">
       <div className="pet-status-card-top">
-        <PetAvatar state={displayedState} />
+        <ActivePetRenderer state={displayedState} pet={currentPet} scale={0.38} />
         <div className="pet-status-meta">
-          <strong>CodePet</strong>
+          <strong>{currentPet.displayName}</strong>
           <span className="pet-status-online">在线</span>
         </div>
       </div>

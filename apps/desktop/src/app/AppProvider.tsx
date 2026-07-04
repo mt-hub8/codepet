@@ -28,6 +28,8 @@ import { calculateNextTrigger, nowIso } from "../reminders/reminderTime";
 import { getAlwaysOnTop, toggleAlwaysOnTop } from "../shared/desktopWindowService";
 import type { AppRoute } from "./navigation";
 import { DEFAULT_ROUTE } from "./navigation";
+import { BUILT_IN_PET_ID, builtInPetAsset, type PetAsset } from "../characters/petAssetTypes";
+import { petAssetService } from "../characters/petAssetService";
 
 const defaultOllamaStatus: OllamaStatus = {
   status: "checking",
@@ -107,6 +109,14 @@ type AppContextValue = {
   handleContinueWaitingCommandTask: (task: CommandTask) => Promise<void>;
   handleSummarizeCommandFailure: (task: CommandTask) => Promise<void>;
   recentCommandTasks: CommandTask[];
+  petAssets: PetAsset[];
+  currentPetId: string;
+  currentPet: PetAsset;
+  petAssetError: string;
+  setPetAssetError: (message: string) => void;
+  refreshPetAssets: () => Promise<void>;
+  handleSetCurrentPet: (petId: string) => Promise<void>;
+  handleDeletePetAsset: (petId: string) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -132,6 +142,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [commandEvents, setCommandEvents] = useState<Record<string, CommandEvent[]>>({});
   const [selectedCommandTaskId, setSelectedCommandTaskId] = useState<string | null>(null);
   const [commandError, setCommandError] = useState("");
+  const [petAssets, setPetAssets] = useState<PetAsset[]>([builtInPetAsset]);
+  const [currentPetId, setCurrentPetId] = useState(BUILT_IN_PET_ID);
+  const [petAssetError, setPetAssetError] = useState("");
   const lastOutputAtRef = useRef<Record<string, number>>({});
   const commandKeywordsRef = useRef<string[]>([]);
 
@@ -159,6 +172,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => commandService.getRecentTasks(commandTasks, 3),
     [commandTasks],
   );
+  const currentPet = useMemo(
+    () => petAssets.find((pet) => pet.id === currentPetId) ?? builtInPetAsset,
+    [petAssets, currentPetId],
+  );
+
+  const refreshPetAssets = useCallback(async () => {
+    const imported = await petAssetService.listImportedAssets();
+    const allAssets = [builtInPetAsset, ...imported];
+    setPetAssets(allAssets);
+    const storedId = await petAssetService.getCurrentPetId();
+    const effectiveId = storedId ?? BUILT_IN_PET_ID;
+    const exists = allAssets.some((pet) => pet.id === effectiveId);
+    setCurrentPetId(exists ? effectiveId : BUILT_IN_PET_ID);
+    if (!exists && effectiveId !== BUILT_IN_PET_ID) {
+      await petAssetService.setCurrentPet(BUILT_IN_PET_ID);
+    }
+  }, []);
 
   const refreshCommandTasks = useCallback(async () => {
     const nextTasks = (await commandService.listTasks()).map(normalizeCommandTask);
@@ -180,7 +210,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSounds(nextSounds);
     const nextTasks = (await commandService.listTasks()).map(normalizeCommandTask);
     setCommandTasks(nextTasks);
-  }, [normalizeCommandTask]);
+    await refreshPetAssets();
+  }, [normalizeCommandTask, refreshPetAssets]);
 
   useEffect(() => {
     getAlwaysOnTop()
@@ -714,6 +745,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [aiReady, localAiSettings],
   );
 
+  const handleSetCurrentPet = useCallback(
+    async (petId: string) => {
+      await petAssetService.setCurrentPet(petId);
+      setCurrentPetId(petId === BUILT_IN_PET_ID ? BUILT_IN_PET_ID : petId);
+      await refreshPetAssets();
+    },
+    [refreshPetAssets],
+  );
+
+  const handleDeletePetAsset = useCallback(
+    async (petId: string) => {
+      await petAssetService.deleteAsset(petId);
+      await refreshPetAssets();
+    },
+    [refreshPetAssets],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       currentRoute,
@@ -774,6 +822,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       handleContinueWaitingCommandTask,
       handleSummarizeCommandFailure,
       recentCommandTasks,
+      petAssets,
+      currentPetId,
+      currentPet,
+      petAssetError,
+      setPetAssetError,
+      refreshPetAssets,
+      handleSetCurrentPet,
+      handleDeletePetAsset,
     }),
     [
       currentRoute,
@@ -827,6 +883,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       handleContinueWaitingCommandTask,
       handleSummarizeCommandFailure,
       recentCommandTasks,
+      petAssets,
+      currentPetId,
+      currentPet,
+      petAssetError,
+      refreshPetAssets,
+      handleSetCurrentPet,
+      handleDeletePetAsset,
     ],
   );
 

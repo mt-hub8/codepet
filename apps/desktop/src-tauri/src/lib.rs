@@ -16,12 +16,13 @@ use tauri::{
 
 mod command_monitor;
 mod agent_tools;
+mod pet_assets;
 
 struct WindowState {
     always_on_top: Mutex<bool>,
 }
 
-struct DbState {
+pub(crate) struct DbState {
     conn: Mutex<Connection>,
 }
 
@@ -113,7 +114,7 @@ fn now_id(prefix: &str) -> String {
     format!("{prefix}-{millis}")
 }
 
-fn app_storage_dir(app: &AppHandle) -> Result<PathBuf, String> {
+pub(crate) fn app_storage_dir(app: &AppHandle) -> Result<PathBuf, String> {
     let base = app.path().app_data_dir().map_err(|error| error.to_string())?;
     Ok(base.join("codepet"))
 }
@@ -129,6 +130,7 @@ fn database_path(app: &AppHandle) -> Result<PathBuf, String> {
 fn init_database(app: &AppHandle) -> Result<Connection, String> {
     let storage_dir = app_storage_dir(app)?;
     fs::create_dir_all(storage_dir.join("sounds")).map_err(|error| error.to_string())?;
+    fs::create_dir_all(storage_dir.join("pets")).map_err(|error| error.to_string())?;
 
     let conn = Connection::open(database_path(app)?).map_err(|error| error.to_string())?;
     conn.execute_batch(
@@ -206,6 +208,19 @@ fn init_database(app: &AppHandle) -> Result<Connection, String> {
         CREATE TABLE IF NOT EXISTS agent_tool_settings (
           key TEXT PRIMARY KEY,
           value TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS pet_assets (
+          id TEXT PRIMARY KEY,
+          display_name TEXT NOT NULL,
+          description TEXT,
+          source TEXT NOT NULL,
+          manifest_path TEXT NOT NULL,
+          spritesheet_path TEXT NOT NULL,
+          grid_json TEXT NOT NULL,
+          animations_json TEXT NOT NULL,
+          created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
         ",
@@ -705,7 +720,7 @@ fn import_reminder_sound(
     Ok(sound)
 }
 
-fn chrono_like_now() -> String {
+pub(crate) fn chrono_like_now() -> String {
     let millis = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis())
@@ -883,6 +898,12 @@ pub fn run() {
             agent_tools::get_agent_tool_setting,
             agent_tools::save_agent_tool_setting,
             agent_tools::detect_executable,
+            pet_assets::preview_pet_import,
+            pet_assets::import_pet_asset,
+            pet_assets::list_pet_assets,
+            pet_assets::delete_pet_asset,
+            pet_assets::get_current_pet_id,
+            pet_assets::set_current_pet_id,
             start_window_drag,
             get_always_on_top,
             toggle_always_on_top,

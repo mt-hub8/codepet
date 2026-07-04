@@ -32,6 +32,14 @@ V0.4.2 起，支持通过 CLI Wrapper 监控 Codex / Cursor / Claude Code。Code
 
 可选「用本地 AI 总结失败原因」功能仅在你手动触发时，将最近一小段日志发送到当前配置的 Ollama 地址。
 
+## 宠物素材
+
+V0.4.5 起，用户导入的 `pet.json` 与 spritesheet 默认保存在本机应用数据目录 `pets/<pet-id>/`，不上传到任何服务。
+
+CodePet 默认不内置第三方 Petdex 社区素材。用户需自行确认导入素材的版权与使用权限。CodePet 不对用户导入素材的版权负责。
+
+请不要将用户导入的宠物素材提交到 GitHub。`.gitignore` 已忽略 `pets/` 与 `user-pets/`。
+
 ## 外部工具
 
 Codex / Cursor / Claude Code 等外部工具可能有自己的数据策略。CodePet 文档需要提醒用户自行确认这些工具的隐私政策、数据保留规则和命令执行行为。

@@ -2,6 +2,15 @@
 
 所有重要变更会记录在这个文件中。
 
+## 0.4.5
+
+- 新增宠物素材导入：支持 `pet.json` + spritesheet.png / webp 文件夹导入。
+- 兼容 Petdex / Codex-compatible 最小格式；默认 8×9 / 192×208 网格推断。
+- 新增 `SpritePetRenderer`、动画状态预览、设为当前桌宠。
+- 桌宠状态与 spritesheet 动画联动；内置默认占位桌宠不可删除。
+- SQLite 新增 `pet_assets` 表；`app_meta` 保存 `current_pet_id`。
+- 更新 README、架构、路线图、快速开始、角色系统文档与隐私说明。
+
 ## 0.4.2
 
 - 新增 Codex / Cursor / Claude Code 轻量 CLI Adapter，统一 `AgentCommandAdapter` 接口。

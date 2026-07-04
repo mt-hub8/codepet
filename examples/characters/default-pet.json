@@ -1,15 +1,12 @@
 {
-  "id": "default-pet",
-  "name": "默认小伙伴",
-  "description": "一个用于演示的默认桌宠角色外观配置。V0.0 只作为示例文件，不接入运行逻辑。",
-  "assetStates": {
-    "idle": "空闲状态资源占位",
-    "thinking": "思考状态资源占位",
-    "happy": "开心状态资源占位",
-    "warning": "提醒状态资源占位",
-    "error": "错误状态资源占位",
-    "sleeping": "睡眠状态资源占位"
-  },
-  "version": "0.0.0"
+  "id": "codepet-demo-pet",
+  "displayName": "CodePet 演示宠物",
+  "description": "用于本地测试导入的示例配置。请搭配 1536×1872 的 spritesheet 使用。",
+  "spritesheetPath": "spritesheet.png",
+  "grid": {
+    "columns": 8,
+    "rows": 9,
+    "frameWidth": 192,
+    "frameHeight": 208
+  }
 }
-

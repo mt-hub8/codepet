@@ -1,6 +1,6 @@
 [package]
 name = "codepet-desktop"
-version = "0.4.2"
+version = "0.4.5"
 description = "CodePet 桌面应用"
 authors = ["CodePet contributors"]
 edition = "2021"

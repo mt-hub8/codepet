@@ -385,6 +385,11 @@
   display: none;
 }
 
+.pet-status-card .active-pet-renderer,
+.pet-status-card .sprite-pet-renderer {
+  flex-shrink: 0;
+}
+
 .pet-status-meta {
   display: grid;
   gap: 4px;
@@ -885,6 +890,128 @@
   border: 1px solid var(--cp-border);
   border-radius: 12px;
   font-family: inherit;
+}
+
+.cp-tag-primary {
+  background: var(--cp-accent-green-soft);
+  color: var(--cp-accent-green);
+}
+
+.cp-btn-danger {
+  color: #b42318;
+  border-color: #fecdca;
+  background: #fff5f5;
+}
+
+.cp-btn-danger:hover {
+  background: #fee4e2;
+}
+
+.cp-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.cp-alert-warning {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+}
+
+.sprite-pet-renderer {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.sprite-pet-renderer-error {
+  display: grid;
+  place-items: center;
+  min-width: 80px;
+  min-height: 80px;
+  border: 1px dashed var(--cp-border);
+  border-radius: 12px;
+  color: var(--cp-text-muted);
+  font-size: 12px;
+}
+
+.active-pet-renderer {
+  display: grid;
+  place-items: center;
+}
+
+.pet-import-panel,
+.pet-asset-list,
+.role-presets-section {
+  display: grid;
+  gap: 14px;
+}
+
+.pet-import-panel-header,
+.pet-import-panel-actions,
+.pet-import-confirm,
+.pet-asset-card-actions,
+.pet-asset-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pet-import-panel-header {
+  justify-content: space-between;
+}
+
+.pet-import-preview,
+.pet-import-meta,
+.pet-animation-preview,
+.pet-asset-card-top,
+.pet-asset-card-meta {
+  display: grid;
+  gap: 10px;
+}
+
+.pet-animation-preview-stage,
+.pet-asset-card-preview {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border-radius: 14px;
+  background: var(--cp-surface-soft);
+}
+
+.pet-animation-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pet-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.pet-asset-card-current {
+  border-color: var(--cp-accent-green);
+  box-shadow: 0 0 0 1px var(--cp-accent-green-soft);
+}
+
+.pet-asset-card-top {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+}
+
+.page-header-compact h2 {
+  font-size: 18px;
+}
+
+.page-header-compact p {
+  margin-top: 4px;
 }
 
 @media (max-width: 900px) {

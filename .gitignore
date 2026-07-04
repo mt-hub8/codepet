@@ -11,6 +11,8 @@ models/
 logs/
 sounds/
 user-sounds/
+pets/
+user-pets/
 appData/
 chat-records/
 local-chat/
