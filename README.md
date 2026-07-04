@@ -2,7 +2,7 @@
 
 CodePet 是一个本地优先（Local-first，优先在用户本机保存和运行）、轻量、可扩展的 AI 桌面伙伴。它的早期目标是做成一个别人可以下载、安装、运行的桌宠提醒工具；长期目标是扩展为支持本地模型、Codex / Cursor / Claude Code 任务监控、角色化记忆、Skill（技能）系统、多角色讨论和 Roundtable（圆桌会议）工作流的 Desktop Agent Companion（桌面 Agent 伙伴）。
 
-当前状态：early MVP（早期最小可行版本）。当前已完成 V0.1 Desktop Pet Shell MVP（桌宠壳子 MVP），优先支持 Windows，macOS / Linux 后续兼容。
+当前状态：early MVP（早期最小可行版本）。当前已完成 V0.2 Local Reminder System（本地提醒系统），优先支持 Windows，macOS / Linux 后续兼容。
 
 CodePet 适合这些用户：
 
@@ -11,7 +11,7 @@ CodePet 适合这些用户：
 - 想要轻量本地 AI 陪伴工具的用户。
 - 想要参与开源、可扩展桌面 Agent 项目的开发者。
 
-## 当前 V0.1 做了什么
+## 当前 V0.2 做了什么
 
 - 建立 Tauri v2 + React + TypeScript 的桌面应用骨架。
 - 实现一个小尺寸、尽量无边框的 CodePet 桌面窗口。
@@ -22,6 +22,12 @@ CodePet 适合这些用户：
 - 关闭窗口时默认隐藏到托盘，点击托盘“退出”才真正退出。
 - 添加桌宠基础状态演示：待机、专注、提醒、完成、警告。
 - 添加状态气泡和状态测试面板。
+- 实现本地提醒系统：喝水、休息、学习、工作和自定义提醒。
+- 支持创建、编辑、启用 / 禁用、删除提醒。
+- 首次启动初始化默认提醒模板，并用 `app_meta` 避免重复创建。
+- 支持提醒触发、完成、稍后提醒、忽略和最近提醒历史。
+- 使用 SQLite 在本机保存提醒配置、提醒历史和提示音配置。
+- 支持默认提示音、自定义提示音导入、试听、删除和按提醒绑定提示音。
 - 建立清晰的模块目录，为 reminders、tasks、characters、personas、skills、memory、workflows、integrations、storage 预留边界。
 - 补充 README、架构文档、路线图、隐私说明、发布说明和 GitHub Desktop 工作流说明。
 - 预留 Ollama、Codex、Cursor、Claude Code 集成目录，但不接入真实功能。
@@ -49,10 +55,9 @@ pnpm tauri dev
 - 暂未发布安装包。
 - 暂未内置本地模型。
 - 暂未接入 Codex / Cursor / Claude Code。
-- 暂未实现提醒调度。
-- 暂未实现数据库。
 - 暂未实现记忆系统。
 - 暂未实现多角色圆桌会议。
+- 暂未实现 AI 语音提醒。
 
 ## 后续计划
 
@@ -72,6 +77,8 @@ CodePet 后续会逐步支持：
 - 多角色 Workflow（工作流）。
 - Roundtable 圆桌会议。
 - GitHub Release 安装包分发。
+
+提示音说明：V0.2 的提示音默认在本地播放，用户导入的音频文件会复制到本机应用数据目录，不上传。请不要把用户导入的音频文件提交到 GitHub。
 
 详细版本链见 [docs/roadmap.md](docs/roadmap.md)。
 

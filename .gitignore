@@ -9,6 +9,9 @@ target
 *.db
 models/
 logs/
+sounds/
+user-sounds/
+appData/
 .DS_Store
 .idea/
 .vscode/

@@ -12,3 +12,6 @@ export async function getAlwaysOnTop() {
   return await invoke<boolean>("get_always_on_top");
 }
 
+export async function showMainWindow() {
+  await invoke("show_main_window_command");
+}

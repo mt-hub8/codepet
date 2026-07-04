@@ -16,24 +16,39 @@
 
 body {
   margin: 0;
-  min-width: 220px;
-  min-height: 260px;
+  min-width: 520px;
+  min-height: 680px;
   overflow: hidden;
   background: transparent;
 }
 
-button {
-  border: 0;
+button,
+input,
+select,
+textarea {
   font: inherit;
 }
 
+button {
+  border: 0;
+  border-radius: 7px;
+  background: #edf5e1;
+  color: #31572c;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .pet-shell {
-  width: 220px;
-  height: 260px;
+  width: 520px;
+  height: 680px;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 8px;
-  padding: 10px;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 10px;
+  padding: 12px;
   border: 1px solid rgba(74, 61, 45, 0.16);
   border-radius: 18px;
   background: #fffbf4;
@@ -56,15 +71,7 @@ button {
 
 .drag-region span {
   font-size: 13px;
-  font-weight: 700;
-}
-
-.drag-region button,
-.status-panel button {
-  border-radius: 7px;
-  background: #edf5e1;
-  color: #31572c;
-  cursor: pointer;
+  font-weight: 800;
 }
 
 .drag-region button {
@@ -72,8 +79,26 @@ button {
   font-size: 12px;
 }
 
+.app-error,
+.form-error {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff0f0;
+  color: #9b2226;
+  font-size: 13px;
+}
+
+.pet-stage {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
 .pet-bubble {
-  min-height: 58px;
+  min-height: 68px;
   padding: 10px 12px;
   border: 1px solid #e1d8c7;
   border-radius: 14px 14px 14px 4px;
@@ -91,19 +116,19 @@ button {
   margin: 0;
   color: #2f2a24;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .pet-avatar {
   position: relative;
   align-self: center;
   justify-self: center;
-  width: 96px;
-  height: 96px;
+  width: 92px;
+  height: 92px;
   display: grid;
   place-items: center;
   border: 2px solid #4a3d2d;
-  border-radius: 36px;
+  border-radius: 34px;
   background: #f6d365;
 }
 
@@ -135,9 +160,9 @@ button {
 
 .pet-shadow {
   position: absolute;
-  bottom: -18px;
-  width: 74px;
-  height: 14px;
+  bottom: -16px;
+  width: 72px;
+  height: 12px;
   border-radius: 999px;
   background: rgba(74, 61, 45, 0.14);
 }
@@ -159,19 +184,197 @@ button {
 }
 
 .status-panel {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
+  gap: 6px;
 }
 
 .status-panel button {
   min-width: 0;
-  padding: 6px 0;
+  padding: 7px 0;
   font-size: 12px;
 }
 
 .status-panel button.active {
   background: #386641;
   color: #ffffff;
+}
+
+.active-reminder {
+  padding: 10px;
+  border: 1px solid #f4a261;
+  border-radius: 10px;
+  background: #fff7ed;
+}
+
+.active-reminder strong {
+  display: block;
+  font-size: 14px;
+}
+
+.active-reminder p {
+  margin: 6px 0 8px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.active-reminder div,
+.form-actions,
+.row-actions,
+.field-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.active-reminder button,
+.form-actions button,
+.row-actions button,
+.field-row button,
+.panel-title button,
+.sound-list button {
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.reminder-panel {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 4px;
+  display: grid;
+  gap: 12px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panel-title h1,
+.reminder-form h2,
+.reminder-list h2,
+.reminder-history h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.reminder-form,
+.reminder-list,
+.reminder-history,
+.sound-picker {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e1d8c7;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.reminder-form label,
+.sound-picker label {
+  display: grid;
+  gap: 4px;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.reminder-form input,
+.reminder-form select,
+.reminder-form textarea,
+.sound-picker select {
+  width: 100%;
+  border: 1px solid #d8cdbb;
+  border-radius: 7px;
+  padding: 7px 8px;
+  background: #fffdf8;
+  color: #24211d;
+}
+
+.reminder-form textarea {
+  min-height: 58px;
+  resize: vertical;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.check-row {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 6px !important;
+}
+
+.check-row input {
+  width: auto;
+}
+
+.reminder-list ul,
+.reminder-history ul,
+.sound-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reminder-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f8f3ea;
+}
+
+.reminder-list strong,
+.reminder-list span,
+.reminder-list small {
+  display: block;
+}
+
+.reminder-list strong {
+  font-size: 14px;
+}
+
+.reminder-list span,
+.reminder-list small,
+.empty-text {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.reminder-history li,
+.sound-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.reminder-history em {
+  color: #386641;
+  font-style: normal;
+}
+
+.sound-list {
+  max-height: 92px;
+  overflow: auto;
+}
+
+@media (max-width: 540px) {
+  body,
+  .pet-shell {
+    width: 100vw;
+    min-width: 0;
+  }
 }
 
