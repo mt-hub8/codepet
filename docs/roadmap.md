@@ -42,6 +42,16 @@ CodePet 的版本链从轻量桌面骨架开始，逐步扩展到提醒、本地
 
 V0.3 不自动安装 Ollama，不自动下载模型，不实现 AI 语音或本地 TTS。后续可探索本地 TTS 或用户自定义语音包，但不能影响轻量默认体验。
 
+## V0.3.5 Local Product UI Simplification（已完成）
+
+- 本地产品 UI 减负与首页重构。
+- 左侧简洁导航 + 右侧主工作台布局。
+- 设计系统 token 抽离（`design/theme.ts`、`tokens.css`、`components.css`）。
+- 首页拆分：`GreetingHeader`、`TodayReminderSection`、`RoleCardSection`、`RecentTaskStatusSection`、`PetStatusCard`。
+- `App.tsx` 减负，状态迁移至 `AppProvider`。
+- 轻量角色卡片预设展示（4 个默认角色）。
+- 任务监控入口与占位页（不含真实命令监控）。
+
 ## V0.4 Command / Codex / Cursor / Claude Code Monitor
 
 - 通用命令监控。

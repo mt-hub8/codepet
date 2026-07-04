@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "CodePet",
-  "version": "0.3.0",
+  "version": "0.3.5",
   "identifier": "dev.codepet.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -13,9 +13,9 @@
     "windows": [
       {
         "title": "CodePet",
-        "width": 520,
-        "height": 680,
-        "resizable": false,
+        "width": 1120,
+        "height": 760,
+        "resizable": true,
         "decorations": false,
         "alwaysOnTop": false,
         "skipTaskbar": true

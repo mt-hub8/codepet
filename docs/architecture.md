@@ -14,13 +14,39 @@ CodePet 的架构目标是轻量、本地优先、模块化、可扩展。桌宠
 
 ## 当前模块边界
 
-- `app`：应用入口、全局布局。
+- `app`：应用入口、`AppProvider` 全局状态、`AppShell` 布局、`AppRoutes` 页面切换、`navigation` 导航定义。
+- `home`：本地产品首页，包含问候区、今日提醒、角色卡片、任务状态占位和桌宠状态卡片。
+- `design`：设计系统 token 与通用 UI 样式（`theme.ts`、`tokens.css`、`components.css`）。
 - `pet`：桌宠展示、状态、气泡 UI 和桌面交互入口。
-- `characters`：角色外观占位和后续扩展。
+- `characters`：轻量角色预设（`rolePresets`）与角色页占位，不含完整角色工作室。
 - `reminders`：提醒配置、默认模板、轻量调度、触发历史、提示音配置和提醒管理 UI。
 - `integrations/ollama`：Ollama 本地模型适配器，负责配置、检测、聊天和 AI 提醒文案生成。
+- `tasks`：任务监控占位，V0.4 才会实现真实命令监控。
+- `settings`：窗口与桌宠调试等基础设置页。
+- `shared`：通用组件、图标、工具函数和桌面窗口服务封装。
 - `storage`：后续统一承载本地存储抽象。当前 SQLite 初始化和访问在 Tauri / Rust 侧，前端通过 service 调用命令。
-- `shared`：通用服务封装，例如桌面窗口能力。
+
+## V0.3.5 UI 信息架构
+
+V0.3.5 将原先集中在 `PetShell` 的 UI 拆分为：
+
+```
+app/App.tsx          → 挂载 AppProvider + AppShell
+app/AppProvider.tsx  → 提醒调度、Ollama 状态、桌宠状态（不含页面 UI）
+app/AppShell.tsx     → 侧边栏 + 标题栏 + 全局提醒横幅
+app/AppRoutes.tsx    → 按路由渲染页面
+home/HomePage.tsx    → 默认本地首页
+```
+
+首页只展示最关键的信息，完整功能通过左侧导航进入二级页面：
+
+- `/reminders`（状态路由 `reminders`）→ 提醒管理
+- `/local-ai` → Ollama 设置与本地聊天
+- `/characters` → 轻量角色预设
+- `/tasks` → 任务监控占位
+- `/settings` → 窗口与桌宠调试
+
+当前使用组件内状态路由，不引入额外路由库。
 
 ## V0.1 桌宠壳子
 
@@ -61,6 +87,7 @@ SQLite 表包括：
 - `ollamaSettingsStorage`：负责本地 AI 配置持久化。
 - `OllamaSettingsPanel`：负责设置 UI。
 - `LocalChatPanel`：负责聊天 UI。
+- `LocalAiPage`：组合设置与聊天入口。
 
 Ollama HTTP 请求封装在 Tauri / Rust 侧，前端不直接请求 Ollama。这样可以避免浏览器 CORS 问题，也能把“只请求用户配置的 Ollama 地址”集中在后端命令中。
 
@@ -72,9 +99,19 @@ http://localhost:11434/api
 
 提醒系统可以通过明确接口请求 AI 文案生成，但不能直接依赖 Ollama HTTP 细节。AI 生成的提醒文案只填入表单，必须由用户点击保存后才写入提醒配置。
 
+## 角色系统边界（V0.3.5）
+
+`characters/rolePresets.ts` 提供 4 个 UI 预设角色，仅用于首页和角色页展示：
+
+- 不含真实角色记忆。
+- 不含 Skill 绑定。
+- 不含共享记忆或角色融合。
+- 完整角色工作室在后续版本实现。
+
 ## 后续边界
 
-Codex / Cursor / Claude Code 属于后续 `integrations` 下的外部 Agent 适配器。它们不属于 V0.3。
+Codex / Cursor / Claude Code 属于后续 `integrations` 下的外部 Agent 适配器。它们不属于 V0.3.5。
+
+V0.4 才会实现 `tasks` 模块的真实命令监控。
 
 后续可以支持 AI 语音、每个角色绑定不同声音、本地 TTS（文本转语音）或用户自定义语音包。但 AI 语音必须是可选功能，不能影响 CodePet 的轻量默认体验。如果后续使用云端 TTS，隐私文档必须明确说明数据会外发；如果使用本地 TTS，需要考虑模型体积、生成延迟和缓存机制。
-

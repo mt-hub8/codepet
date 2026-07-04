@@ -1,5 +1,10 @@
-import { PetShell } from "../pet/PetShell";
+import { AppProvider } from "./AppProvider";
+import { AppShell } from "./AppShell";
 
 export function App() {
-  return <PetShell />;
+  return (
+    <AppProvider>
+      <AppShell />
+    </AppProvider>
+  );
 }

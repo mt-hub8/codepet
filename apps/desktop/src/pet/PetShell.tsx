@@ -1,3 +1,6 @@
+/**
+ * @deprecated V0.3.5 起由 AppShell + AppProvider 接管。保留此文件供参考，不再挂载。
+ */
 import { useEffect, useMemo, useState } from "react";
 import { LocalChatPanel } from "../integrations/ollama/LocalChatPanel";
 import { OllamaSettingsPanel } from "../integrations/ollama/OllamaSettingsPanel";
