@@ -1,6 +1,6 @@
-import { PetAvatar } from "../../pet/PetAvatar";
-import { petStateLabels } from "../../pet/petState";
-import { useApp } from "../../app/AppProvider";
+import { PetAvatar } from "../pet/PetAvatar";
+import { petStateLabels } from "../pet/petState";
+import { useApp } from "../app/AppProvider";
 
 export function PetStatusCard() {
   const { displayedState, ollamaStatus, aiReady } = useApp();

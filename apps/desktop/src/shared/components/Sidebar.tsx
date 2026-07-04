@@ -1,6 +1,6 @@
-import { NavIcon } from "../shared/icons/NavIcons";
-import { useApp } from "./AppProvider";
-import { navItems, type AppRoute } from "./navigation";
+import { NavIcon } from "../icons/NavIcons";
+import { useApp } from "../../app/AppProvider";
+import { navItems, type NavItem } from "../../app/navigation";
 
 export function Sidebar() {
   const { currentRoute, navigate } = useApp();
@@ -18,14 +18,14 @@ export function Sidebar() {
       </div>
 
       <nav className="sidebar-nav" aria-label="主导航">
-        {navItems.map((item) => (
+        {navItems.map((item: NavItem) => (
           <button
             key={item.id}
             type="button"
             className={`sidebar-nav-item${currentRoute === item.id ? " active" : ""}`}
             onClick={() => navigate(item.id)}
           >
-            <NavIcon route={item.id as AppRoute} />
+            <NavIcon route={item.id} />
             {item.label}
           </button>
         ))}

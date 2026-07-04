@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useApp } from "../app/AppProvider";
+import { useApp } from "../../app/AppProvider";
 import { LocalChatPanel } from "./LocalChatPanel";
 import { OllamaSettingsPanel } from "./OllamaSettingsPanel";
 
