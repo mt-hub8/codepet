@@ -18,6 +18,20 @@ http://localhost:11434/api
 
 如果用户把 Ollama API 地址改成远程地址，聊天内容和用于生成提醒文案的标题、类型、原始文案可能会发送到远程服务。用户需要自行确认远程服务的数据策略。
 
+## 本地命令监控
+
+V0.4.1 起，命令任务配置、stdout / stderr 日志和 exit code 默认保存在本机 SQLite 中，不上传到任何服务。
+
+V0.4.2 起，支持通过 CLI Wrapper 监控 Codex / Cursor / Claude Code。CodePet 不做屏幕识别，不替用户确认权限，不保存 API Key，不处理外部工具登录。
+
+命令必须由用户主动点击启动。CodePet 不会自动执行命令，也不会上传你的工作目录、命令内容或日志输出。
+
+对明显危险命令（如 `rm -rf`、`del /s`、`format` 等）会要求二次确认。
+
+等待确认关键词可自定义，保存在本机 `agent_tool_settings` 中。
+
+可选「用本地 AI 总结失败原因」功能仅在你手动触发时，将最近一小段日志发送到当前配置的 Ollama 地址。
+
 ## 外部工具
 
 Codex / Cursor / Claude Code 等外部工具可能有自己的数据策略。CodePet 文档需要提醒用户自行确认这些工具的隐私政策、数据保留规则和命令执行行为。

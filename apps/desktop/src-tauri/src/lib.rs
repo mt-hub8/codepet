@@ -14,6 +14,9 @@ use tauri::{
     AppHandle, Manager, PhysicalPosition, State, WindowEvent,
 };
 
+mod command_monitor;
+mod agent_tools;
+
 struct WindowState {
     always_on_top: Mutex<bool>,
 }
@@ -173,6 +176,38 @@ fn init_database(app: &AppHandle) -> Result<Connection, String> {
           value TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS command_tasks (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          adapter_type TEXT NOT NULL DEFAULT 'generic',
+          working_directory TEXT NOT NULL,
+          command TEXT NOT NULL,
+          args_json TEXT,
+          prompt_or_command TEXT,
+          executable_path TEXT,
+          status TEXT NOT NULL DEFAULT 'pending',
+          exit_code INTEGER,
+          no_output_timeout_minutes INTEGER NOT NULL DEFAULT 5,
+          started_at TEXT,
+          completed_at TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS command_events (
+          id TEXT PRIMARY KEY,
+          task_id TEXT NOT NULL,
+          event_type TEXT NOT NULL,
+          content TEXT,
+          created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS agent_tool_settings (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
         ",
     )
     .map_err(|error| error.to_string())?;
@@ -180,6 +215,22 @@ fn init_database(app: &AppHandle) -> Result<Connection, String> {
     let _ = conn.execute("ALTER TABLE reminders ADD COLUMN sound_id TEXT", []);
     let _ = conn.execute(
         "ALTER TABLE reminders ADD COLUMN sound_enabled INTEGER NOT NULL DEFAULT 1",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE command_tasks ADD COLUMN adapter_type TEXT NOT NULL DEFAULT 'generic'",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE command_tasks ADD COLUMN prompt_or_command TEXT",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE command_tasks ADD COLUMN executable_path TEXT",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE command_tasks ADD COLUMN no_output_timeout_minutes INTEGER NOT NULL DEFAULT 5",
         [],
     );
 
@@ -802,6 +853,7 @@ pub fn run() {
         .manage(WindowState {
             always_on_top: Mutex::new(false),
         })
+        .manage(command_monitor::CommandRunnerState::default())
         .invoke_handler(tauri::generate_handler![
             get_storage_info,
             get_app_meta,
@@ -819,6 +871,18 @@ pub fn run() {
             list_reminder_sounds,
             import_reminder_sound,
             delete_reminder_sound,
+            command_monitor::list_command_tasks,
+            command_monitor::save_command_task,
+            command_monitor::delete_command_task,
+            command_monitor::list_command_events,
+            command_monitor::clear_command_events,
+            command_monitor::start_command_task,
+            command_monitor::cancel_command_task,
+            command_monitor::update_command_task_status,
+            command_monitor::add_command_event,
+            agent_tools::get_agent_tool_setting,
+            agent_tools::save_agent_tool_setting,
+            agent_tools::detect_executable,
             start_window_drag,
             get_always_on_top,
             toggle_always_on_top,

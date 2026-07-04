@@ -4,11 +4,20 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { commandAlertService } from "../integrations/command/commandAlertService";
+import { dependencyDetection } from "../integrations/command/dependencyDetection";
 import { ollamaService, type ReminderPromptTone } from "../integrations/ollama/ollamaService";
 import type { LocalAiSettings, OllamaStatus } from "../integrations/ollama/ollamaTypes";
+import { commandRunner } from "../integrations/command/commandRunner";
+import {
+  commandService,
+  type CreateCommandTaskInput,
+} from "../integrations/command/commandService";
+import type { CommandEvent, CommandTask } from "../integrations/command/commandTypes";
 import type { PetState } from "../pet/petState";
 import { checkDueReminder } from "../reminders/reminderScheduler";
 import { reminderService } from "../reminders/reminderService";
@@ -81,6 +90,23 @@ type AppContextValue = {
   handleChatReply: (reply: string) => void;
   handleChatError: (message: string) => void;
   aiReady: boolean;
+  commandTasks: CommandTask[];
+  commandEvents: Record<string, CommandEvent[]>;
+  selectedCommandTaskId: string | null;
+  setSelectedCommandTaskId: (taskId: string | null) => void;
+  commandError: string;
+  setCommandError: (message: string) => void;
+  refreshCommandTasks: () => Promise<void>;
+  handleCreateCommandTask: (input: CreateCommandTaskInput) => Promise<CommandTask>;
+  handleUpdateCommandTask: (task: CommandTask) => Promise<void>;
+  handleDeleteCommandTask: (task: CommandTask) => Promise<void>;
+  handleStartCommandTask: (task: CommandTask) => Promise<void>;
+  handleCancelCommandTask: (task: CommandTask) => Promise<void>;
+  handleRerunCommandTask: (task: CommandTask) => Promise<void>;
+  handlePickWorkingDirectory: () => Promise<string | null>;
+  handleContinueWaitingCommandTask: (task: CommandTask) => Promise<void>;
+  handleSummarizeCommandFailure: (task: CommandTask) => Promise<void>;
+  recentCommandTasks: CommandTask[];
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -102,6 +128,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus>(defaultOllamaStatus);
   const [isCheckingOllama, setIsCheckingOllama] = useState(false);
   const [isRemoteBaseUrl, setIsRemoteBaseUrl] = useState(false);
+  const [commandTasks, setCommandTasks] = useState<CommandTask[]>([]);
+  const [commandEvents, setCommandEvents] = useState<Record<string, CommandEvent[]>>({});
+  const [selectedCommandTaskId, setSelectedCommandTaskId] = useState<string | null>(null);
+  const [commandError, setCommandError] = useState("");
+  const lastOutputAtRef = useRef<Record<string, number>>({});
+  const commandKeywordsRef = useRef<string[]>([]);
+
+  const normalizeCommandTask = useCallback((task: CommandTask): CommandTask => ({
+    ...task,
+    adapterType: task.adapterType ?? "generic",
+    noOutputTimeoutMinutes: task.noOutputTimeoutMinutes ?? 5,
+  }), []);
+
+  const playCommandAlertSound = useCallback(async () => {
+    const soundList = await reminderSoundService.listSounds();
+    const defaultSound = soundList.find((sound) => sound.id === "default-beep");
+    if (defaultSound) {
+      await reminderSoundService.playSound(defaultSound);
+    }
+  }, []);
 
   const displayedState = activeReminder ? "reminding" : petState;
   const activeTitle = useMemo(
@@ -109,6 +155,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [activeReminder],
   );
   const aiReady = Boolean(localAiSettings.enabled && localAiSettings.selectedModel);
+  const recentCommandTasks = useMemo(
+    () => commandService.getRecentTasks(commandTasks, 3),
+    [commandTasks],
+  );
+
+  const refreshCommandTasks = useCallback(async () => {
+    const nextTasks = (await commandService.listTasks()).map(normalizeCommandTask);
+    setCommandTasks(nextTasks);
+    if (selectedCommandTaskId) {
+      const events = await commandService.listEvents(selectedCommandTaskId);
+      setCommandEvents((current) => ({ ...current, [selectedCommandTaskId]: events }));
+    }
+  }, [normalizeCommandTask, selectedCommandTaskId]);
 
   const refreshAll = useCallback(async () => {
     const [nextReminders, nextEvents, nextSounds] = await Promise.all([
@@ -119,7 +178,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setReminders(nextReminders);
     setEvents(nextEvents);
     setSounds(nextSounds);
-  }, []);
+    const nextTasks = (await commandService.listTasks()).map(normalizeCommandTask);
+    setCommandTasks(nextTasks);
+  }, [normalizeCommandTask]);
 
   useEffect(() => {
     getAlwaysOnTop()
@@ -148,7 +209,171 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setOllamaStatus(status);
       })
       .catch(() => undefined);
-  }, [refreshAll]);
+
+    void refreshCommandTasks();
+    void dependencyDetection.loadKeywords().then((keywords) => {
+      commandKeywordsRef.current = keywords;
+    });
+  }, [refreshAll, refreshCommandTasks]);
+
+  useEffect(() => {
+    if (!selectedCommandTaskId) {
+      return;
+    }
+    void commandService.listEvents(selectedCommandTaskId).then((events) => {
+      setCommandEvents((current) => ({ ...current, [selectedCommandTaskId]: events }));
+    });
+  }, [selectedCommandTaskId]);
+
+  useEffect(() => {
+    let unlisteners: Array<() => void> = [];
+    let disposed = false;
+
+    const alertCallbacks = {
+      onNeedsUserInput: (task: CommandTask, _line: string) => {
+        if (!activeReminder) {
+          setPetState("warning");
+          setActiveMessage("外部 Agent 可能正在等待你确认");
+        }
+        void playCommandAlertSound();
+        void refreshCommandTasks();
+      },
+      onNoOutputTimeout: (task: CommandTask) => {
+        if (!activeReminder) {
+          setPetState("warning");
+          setActiveMessage("命令已经一段时间没有新输出了");
+        }
+        void playCommandAlertSound();
+        void refreshCommandTasks();
+      },
+      onOutputReceived: (taskId: string) => {
+        lastOutputAtRef.current[taskId] = Date.now();
+      },
+    };
+
+    void commandRunner.subscribe({
+      onOutput: (payload) => {
+        lastOutputAtRef.current[payload.taskId] = Date.now();
+        void (async () => {
+          const events = await commandService.listEvents(payload.taskId);
+          if (disposed) {
+            return;
+          }
+          setCommandEvents((current) => ({ ...current, [payload.taskId]: events }));
+          const task = commandTasks.find((item) => item.id === payload.taskId);
+          if (!task) {
+            const tasks = await commandService.listTasks();
+            const found = tasks.map(normalizeCommandTask).find((item) => item.id === payload.taskId);
+            if (found) {
+              await commandAlertService.handleOutputLine(
+                found,
+                payload.content,
+                commandKeywordsRef.current,
+                alertCallbacks,
+              );
+            }
+            return;
+          }
+          await commandAlertService.handleOutputLine(
+            task,
+            payload.content,
+            commandKeywordsRef.current,
+            alertCallbacks,
+          );
+          await refreshCommandTasks();
+        })();
+      },
+      onStatusChanged: () => {
+        void refreshCommandTasks();
+      },
+      onFinished: (payload) => {
+        delete lastOutputAtRef.current[payload.taskId];
+        void (async () => {
+          const events = await commandService.listEvents(payload.taskId);
+          const tasks = (await commandService.listTasks()).map(normalizeCommandTask);
+          if (disposed) {
+            return;
+          }
+          setCommandEvents((current) => ({ ...current, [payload.taskId]: events }));
+          setCommandTasks(tasks);
+
+          if (!activeReminder) {
+            if (payload.status === "succeeded") {
+              setPetState("success");
+              setActiveMessage("任务执行完成");
+              await playCommandAlertSound();
+            } else if (payload.status === "failed") {
+              setPetState("warning");
+              setActiveMessage("任务执行失败，请查看日志");
+              await playCommandAlertSound();
+            } else {
+              setPetState(manualPetState);
+              setActiveMessage("任务已取消");
+            }
+            window.setTimeout(() => {
+              if (!activeReminder) {
+                setPetState(manualPetState);
+                setActiveMessage("");
+              }
+            }, 2400);
+          }
+        })();
+      },
+    }).then((listeners) => {
+      if (disposed) {
+        listeners.forEach((unlisten) => unlisten());
+        return;
+      }
+      unlisteners = listeners;
+    });
+
+    return () => {
+      disposed = true;
+      unlisteners.forEach((unlisten) => unlisten());
+    };
+  }, [
+    activeReminder,
+    commandTasks,
+    manualPetState,
+    normalizeCommandTask,
+    playCommandAlertSound,
+    refreshCommandTasks,
+  ]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      commandTasks.forEach((task) => {
+        if (!commandService.isActiveStatus(task.status)) {
+          return;
+        }
+        const lastOutput = lastOutputAtRef.current[task.id] ?? now;
+        const timeoutMs = task.noOutputTimeoutMinutes * 60_000;
+        if (now - lastOutput < timeoutMs) {
+          return;
+        }
+        if (task.status === "no_output_timeout") {
+          return;
+        }
+        void commandAlertService.triggerNoOutputTimeout(task, {
+          onNeedsUserInput: () => undefined,
+          onNoOutputTimeout: () => {
+            if (!activeReminder) {
+              setPetState("warning");
+              setActiveMessage("命令已经一段时间没有新输出了");
+            }
+            void playCommandAlertSound();
+            void refreshCommandTasks();
+          },
+          onOutputReceived: (taskId) => {
+            lastOutputAtRef.current[taskId] = Date.now();
+          },
+        });
+      });
+    }, 15_000);
+
+    return () => window.clearInterval(timer);
+  }, [activeReminder, commandTasks, playCommandAlertSound, refreshCommandTasks]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -351,6 +576,144 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setError(message);
   }, []);
 
+  const handleCreateCommandTask = useCallback(async (input: CreateCommandTaskInput) => {
+    const task = await commandService.createTask(input);
+    await refreshCommandTasks();
+    return task;
+  }, [refreshCommandTasks]);
+
+  const handleUpdateCommandTask = useCallback(
+    async (task: CommandTask) => {
+      await commandService.updateTask(task);
+      await refreshCommandTasks();
+    },
+    [refreshCommandTasks],
+  );
+
+  const handleDeleteCommandTask = useCallback(
+    async (task: CommandTask) => {
+      if (!window.confirm(`确定删除命令任务“${task.title}”吗？`)) {
+        return;
+      }
+      await commandService.deleteTask(task);
+      if (selectedCommandTaskId === task.id) {
+        setSelectedCommandTaskId(null);
+      }
+      await refreshCommandTasks();
+    },
+    [refreshCommandTasks, selectedCommandTaskId],
+  );
+
+  const handleStartCommandTask = useCallback(
+    async (task: CommandTask) => {
+      setCommandError("");
+      try {
+        if (!activeReminder) {
+          setPetState("focusing");
+          setActiveMessage("任务正在执行");
+        }
+        const events = await commandService.listEvents(task.id);
+        setCommandEvents((current) => ({ ...current, [task.id]: events }));
+        setSelectedCommandTaskId(task.id);
+        lastOutputAtRef.current[task.id] = Date.now();
+        await commandService.startTask(task);
+        await refreshCommandTasks();
+      } catch (startError) {
+        if (!activeReminder) {
+          setPetState(manualPetState);
+          setActiveMessage("");
+        }
+        setCommandError(startError instanceof Error ? startError.message : "启动命令失败");
+        throw startError;
+      }
+    },
+    [activeReminder, manualPetState, refreshCommandTasks],
+  );
+
+  const handleCancelCommandTask = useCallback(
+    async (task: CommandTask) => {
+      setCommandError("");
+      try {
+        await commandService.cancelTask(task.id);
+        await refreshCommandTasks();
+        if (!activeReminder) {
+          setPetState(manualPetState);
+          setActiveMessage("任务已取消");
+        }
+      } catch (cancelError) {
+        setCommandError(cancelError instanceof Error ? cancelError.message : "取消任务失败");
+      }
+    },
+    [activeReminder, manualPetState, refreshCommandTasks],
+  );
+
+  const handleRerunCommandTask = useCallback(
+    async (task: CommandTask) => {
+      const reset = await commandService.resetTaskForRerun(task);
+      await refreshCommandTasks();
+      await handleStartCommandTask(reset);
+    },
+    [handleStartCommandTask, refreshCommandTasks],
+  );
+
+  const handlePickWorkingDirectory = useCallback(
+    () => commandService.pickWorkingDirectory(),
+    [],
+  );
+
+  const handleContinueWaitingCommandTask = useCallback(
+    async (task: CommandTask) => {
+      lastOutputAtRef.current[task.id] = Date.now();
+      await commandService.updateTaskStatus(task.id, "running", "用户选择继续等待");
+      await refreshCommandTasks();
+      if (!activeReminder) {
+        setPetState("focusing");
+        setActiveMessage("继续监控任务输出");
+      }
+    },
+    [activeReminder, refreshCommandTasks],
+  );
+
+  const handleSummarizeCommandFailure = useCallback(
+    async (task: CommandTask) => {
+      if (!aiReady) {
+        throw new Error("请先启用本地 AI 并选择模型。");
+      }
+      const events = await commandService.listEvents(task.id);
+      const logs = commandService
+        .filterLogEvents(events)
+        .slice(-12)
+        .map((event) => event.content ?? "")
+        .join("\n");
+      if (!logs.trim()) {
+        throw new Error("没有可总结的日志内容。");
+      }
+      if (
+        !window.confirm(
+          "将把最近一小段 stdout / stderr 发送到你当前配置的 Ollama 地址进行总结。请确认隐私风险。",
+        )
+      ) {
+        return;
+      }
+      setPetState("thinking");
+      setActiveMessage("我在请本地模型总结失败原因。");
+      try {
+        const reply = await ollamaService.chat(localAiSettings, [
+          {
+            role: "user",
+            content: `请用中文简要总结以下命令失败的可能原因，不要建议自动执行任何命令：\n${logs}`,
+          },
+        ]);
+        setActiveMessage(reply.slice(0, 120));
+        setPetState("warning");
+      } catch (summaryError) {
+        setPetState("warning");
+        throw summaryError;
+      }
+    },
+    [aiReady, localAiSettings],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       currentRoute,
@@ -394,6 +757,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       handleChatReply,
       handleChatError,
       aiReady,
+      commandTasks,
+      commandEvents,
+      selectedCommandTaskId,
+      setSelectedCommandTaskId,
+      commandError,
+      setCommandError,
+      refreshCommandTasks,
+      handleCreateCommandTask,
+      handleUpdateCommandTask,
+      handleDeleteCommandTask,
+      handleStartCommandTask,
+      handleCancelCommandTask,
+      handleRerunCommandTask,
+      handlePickWorkingDirectory,
+      handleContinueWaitingCommandTask,
+      handleSummarizeCommandFailure,
+      recentCommandTasks,
     }),
     [
       currentRoute,
@@ -432,6 +812,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       handleChatReply,
       handleChatError,
       aiReady,
+      commandTasks,
+      commandEvents,
+      selectedCommandTaskId,
+      commandError,
+      refreshCommandTasks,
+      handleCreateCommandTask,
+      handleUpdateCommandTask,
+      handleDeleteCommandTask,
+      handleStartCommandTask,
+      handleCancelCommandTask,
+      handleRerunCommandTask,
+      handlePickWorkingDirectory,
+      handleContinueWaitingCommandTask,
+      handleSummarizeCommandFailure,
+      recentCommandTasks,
     ],
   );
 

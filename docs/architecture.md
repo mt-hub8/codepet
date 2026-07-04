@@ -15,13 +15,14 @@ CodePet 的架构目标是轻量、本地优先、模块化、可扩展。桌宠
 ## 当前模块边界
 
 - `app`：应用入口、`AppProvider` 全局状态、`AppShell` 布局、`AppRoutes` 页面切换、`navigation` 导航定义。
-- `home`：本地产品首页，包含问候区、今日提醒、角色卡片、任务状态占位和桌宠状态卡片。
+- `home`：本地产品首页，包含问候区、今日提醒、角色卡片、最近任务摘要和桌宠状态卡片。
 - `design`：设计系统 token 与通用 UI 样式（`theme.ts`、`tokens.css`、`components.css`）。
 - `pet`：桌宠展示、状态、气泡 UI 和桌面交互入口。
 - `characters`：轻量角色预设（`rolePresets`）与角色页占位，不含完整角色工作室。
 - `reminders`：提醒配置、默认模板、轻量调度、触发历史、提示音配置和提醒管理 UI。
 - `integrations/ollama`：Ollama 本地模型适配器，负责配置、检测、聊天和 AI 提醒文案生成。
-- `tasks`：任务监控占位，V0.4 才会实现真实命令监控。
+- `integrations/command`：通用命令监控 MVP，负责任务创建、用户确认启动、日志展示和状态流转。
+- `tasks`：任务监控页面，组合 `CommandTaskPanel`。
 - `settings`：窗口与桌宠调试等基础设置页。
 - `shared`：通用组件、图标、工具函数和桌面窗口服务封装。
 - `storage`：后续统一承载本地存储抽象。当前 SQLite 初始化和访问在 Tauri / Rust 侧，前端通过 service 调用命令。
@@ -43,7 +44,7 @@ home/HomePage.tsx    → 默认本地首页
 - `/reminders`（状态路由 `reminders`）→ 提醒管理
 - `/local-ai` → Ollama 设置与本地聊天
 - `/characters` → 轻量角色预设
-- `/tasks` → 任务监控占位
+- `/tasks` → 命令任务监控
 - `/settings` → 窗口与桌宠调试
 
 当前使用组件内状态路由，不引入额外路由库。
@@ -78,6 +79,44 @@ SQLite 表包括：
 - `reminder_sounds`
 - `app_meta`
 
+## V0.4.1 通用命令监控
+
+`integrations/command` 分层如下：
+
+- `commandTypes`：任务与事件类型定义。
+- `commandStorage`：调用 Tauri 命令读写 SQLite。
+- `commandRunner`：订阅 `command-output` / `command-finished` 事件，调用启动与取消命令。
+- `commandService`：任务 CRUD、危险命令确认、状态流转编排。
+- `commandSafety`：高风险命令模式检测与二次确认。
+- `CommandTaskPanel` / `CommandTaskForm` / `CommandLogViewer`：任务监控 UI。
+
+进程启动、stdout / stderr 捕获和 exit code 记录在 Tauri / Rust 的 `command_monitor` 模块中。UI 不直接运行命令。
+
+SQLite 新增表：
+
+- `command_tasks`
+- `command_events`
+
+命令必须由用户主动点击启动。不会自动执行 AI 生成的命令，也不会后台偷偷运行。
+
+## V0.4.2 Agent CLI Adapter + Takeover Alerts
+
+在 V0.4.1 基础上扩展：
+
+- `agentAdapterTypes` / `agentAdapters`：统一 `AgentCommandAdapter` 接口与注册表。
+- `genericAdapter`：通用命令适配器。
+- `integrations/codex`、`integrations/cursor`、`integrations/claude-code`：轻量 CLI 封装。
+- `commandDetection`：可配置的等待确认关键词检测。
+- `commandAlertService`：输出检测与长时间无输出轮询；有新输出后 `no_output_timeout` 恢复为 `running`。
+- `dependencyDetection` / `dependencyStorage` / `DependencyCheckPanel`：依赖检测与 CLI 路径配置。
+- `agent_tools`（Rust）：CLI 可执行文件检测与 `agent_tool_settings` 持久化。
+
+`command_tasks` 扩展字段：`adapter_type`、`prompt_or_command`、`executable_path`、`no_output_timeout_minutes`。
+
+`command_events` 新增事件类型：`needs_user_input`、`no_output_timeout`。
+
+CodePet 通过 CLI Wrapper 监控外部工具，不做屏幕识别，不替用户确认权限，不保存 API Key。
+
 ## V0.3 Ollama 本地 AI
 
 `integrations/ollama` 是外部本地模型适配器。
@@ -108,10 +147,8 @@ http://localhost:11434/api
 - 不含共享记忆或角色融合。
 - 完整角色工作室在后续版本实现。
 
-## 后续边界
+## 外部 Agent 边界
 
-Codex / Cursor / Claude Code 属于后续 `integrations` 下的外部 Agent 适配器。它们不属于 V0.3.5。
+Codex / Cursor / Claude Code 适配器只负责构造命令和检测输出，不直接操作 UI，不自动确认权限，不自动执行 AI 生成的命令。用户可自定义 CLI 路径与等待确认关键词。未安装对应 CLI 时显示友好提示，应用不崩溃。
 
-V0.4 才会实现 `tasks` 模块的真实命令监控。
-
-后续可以支持 AI 语音、每个角色绑定不同声音、本地 TTS（文本转语音）或用户自定义语音包。但 AI 语音必须是可选功能，不能影响 CodePet 的轻量默认体验。如果后续使用云端 TTS，隐私文档必须明确说明数据会外发；如果使用本地 TTS，需要考虑模型体积、生成延迟和缓存机制。
+Petdex 导入规划在 V0.4.5，宠物孵化提示词向导规划在 V0.4.6。

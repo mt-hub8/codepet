@@ -2,6 +2,27 @@
 
 所有重要变更会记录在这个文件中。
 
+## 0.4.2
+
+- 新增 Codex / Cursor / Claude Code 轻量 CLI Adapter，统一 `AgentCommandAdapter` 接口。
+- 支持用户自定义 CLI 可执行路径与等待确认关键词。
+- 等待用户确认检测：任务状态 `needs_user_input`，桌宠气泡与提示音提醒，不自动确认。
+- 长时间无输出检测：任务状态 `no_output_timeout`，默认 5 分钟，不自动 kill 进程。
+- 依赖检测面板：Git、Node.js、pnpm、Codex / Cursor / Claude Code CLI。
+- 首页最近任务支持等待确认、长时间无输出、已取消等状态。
+- 可选手动「用本地 AI 总结失败原因」按钮。
+- SQLite 扩展 `command_tasks` 字段与 `agent_tool_settings` 表。
+- 更新 README、架构文档、路线图、快速开始、隐私说明与 Agent 接入文档。
+
+## 0.4.1
+
+- 新增 Generic Command Monitor MVP（通用命令监控 MVP）。
+- 支持创建命令任务、用户确认启动、取消、重新运行和删除。
+- 捕获 stdout / stderr，记录 exit code，本地 SQLite 保存任务与事件。
+- 命令完成或失败时更新桌宠状态、气泡和首页最近任务摘要。
+- 高风险命令二次确认；不上传命令、日志或代码到云端。
+- 更新 README、架构文档、路线图、快速开始和隐私说明。
+
 ## 0.3.5
 
 - 重构本地产品 UI：左侧简洁导航 + 右侧主工作台。
