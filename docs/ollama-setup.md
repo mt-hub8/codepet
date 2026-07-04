@@ -1,18 +1,72 @@
-# Ollama 接入设计
+# Ollama 设置
 
-Ollama 是后续本地模型能力的候选方案。V0.0 阶段只预留 `apps/desktop/src/integrations/ollama` 目录和文档，不实现任何调用。
+Ollama 是 CodePet V0.3 使用的本地模型运行方式。CodePet 不会自动安装 Ollama，也不会自动下载模型。
 
-## 后续目标
+## 安装 Ollama
 
-- 检测用户是否安装 Ollama。
-- 引导用户选择适合本机的小模型。
-- 为提醒话术和轻量聊天提供本地模型能力。
-- 所有本地模型配置都必须由用户主动开启。
+请前往 Ollama 官方网站下载并安装适合你系统的版本：
 
-## V0.0 不做什么
+```text
+https://ollama.com
+```
 
-- 不调用 Ollama API。
-- 不下载模型。
-- 不保存模型配置。
-- 不实现聊天功能。
+Windows 用户安装后，通常会自动启动本地服务。
+
+## 检查 Ollama 是否可用
+
+默认 API 地址：
+
+```text
+http://localhost:11434/api
+```
+
+可以在终端中运行：
+
+```bash
+ollama list
+```
+
+也可以访问：
+
+```text
+http://localhost:11434/api/tags
+```
+
+如果 CodePet 显示未检测到 Ollama，请确认 Ollama 已安装并正在运行。
+
+## 拉取推荐模型
+
+CodePet V0.3 只展示推荐命令，不会自动下载模型。
+
+轻量优先：
+
+```bash
+ollama pull qwen3:0.6b
+```
+
+质量和性能平衡：
+
+```bash
+ollama pull qwen2.5:1.5b
+```
+
+轻量聊天备选：
+
+```bash
+ollama pull gemma3:1b
+```
+
+用户也可以选择自己已经安装的其他模型。
+
+## 在 CodePet 中选择模型
+
+1. 打开“本地 AI 设置”。
+2. 点击“重新检测”。
+3. 在模型列表中选择默认模型。
+4. 勾选“启用本地 AI”。
+5. 点击“保存本地 AI 配置”。
+
+## 隐私提醒
+
+默认情况下，CodePet 只连接本机 Ollama。若你把 API 地址改成远程地址，聊天内容和提醒文案生成输入可能会发送到远程服务，请自行确认隐私风险。
 

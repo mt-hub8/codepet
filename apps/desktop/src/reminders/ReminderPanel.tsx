@@ -1,4 +1,5 @@
 import { ReminderForm } from "./ReminderForm";
+import type { ReminderPromptTone } from "../integrations/ollama/ollamaService";
 import { ReminderHistory } from "./ReminderHistory";
 import { ReminderList } from "./ReminderList";
 import type { ReminderSound } from "./reminderSoundTypes";
@@ -17,6 +18,13 @@ type ReminderPanelProps = {
   onImportSound: () => Promise<void>;
   onPlaySound: (sound: ReminderSound) => void;
   onDeleteSound: (sound: ReminderSound) => Promise<void>;
+  onGenerateReminderMessage?: (input: {
+    title: string;
+    reminderType: Reminder["reminderType"];
+    message?: string;
+    tone: ReminderPromptTone;
+  }) => Promise<string>;
+  aiEnabled: boolean;
 };
 
 export function ReminderPanel({
@@ -32,6 +40,8 @@ export function ReminderPanel({
   onImportSound,
   onPlaySound,
   onDeleteSound,
+  onGenerateReminderMessage,
+  aiEnabled,
 }: ReminderPanelProps) {
   return (
     <section className="reminder-panel" aria-label="本地提醒">
@@ -50,6 +60,8 @@ export function ReminderPanel({
         onImportSound={() => void onImportSound()}
         onPlaySound={onPlaySound}
         onDeleteSound={(sound) => void onDeleteSound(sound)}
+        onGenerateMessage={onGenerateReminderMessage}
+        aiEnabled={aiEnabled}
       />
 
       <ReminderList
@@ -62,4 +74,3 @@ export function ReminderPanel({
     </section>
   );
 }
-

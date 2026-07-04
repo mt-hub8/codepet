@@ -2,11 +2,12 @@ use std::{
     fs,
     path::{Path, PathBuf},
     sync::Mutex,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
@@ -65,6 +66,40 @@ struct ReminderSound {
 struct StorageInfo {
     database_path: String,
     sounds_dir: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LocalAiSettings {
+    enabled: bool,
+    provider: String,
+    base_url: String,
+    selected_model: Option<String>,
+    updated_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct OllamaModel {
+    name: String,
+    size: Option<i64>,
+    modified_at: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OllamaStatus {
+    status: String,
+    base_url: String,
+    models: Vec<OllamaModel>,
+    selected_model: Option<String>,
+    error_message: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct OllamaChatMessage {
+    role: String,
+    content: String,
 }
 
 fn now_id(prefix: &str) -> String {
@@ -132,6 +167,12 @@ fn init_database(app: &AppHandle) -> Result<Connection, String> {
           key TEXT PRIMARY KEY,
           value TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS local_ai_settings (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
         ",
     )
     .map_err(|error| error.to_string())?;
@@ -158,6 +199,76 @@ fn init_database(app: &AppHandle) -> Result<Connection, String> {
     .map_err(|error| error.to_string())?;
 
     Ok(conn)
+}
+
+fn normalize_ollama_base_url(base_url: &str) -> String {
+    let trimmed = base_url.trim().trim_end_matches('/');
+    if trimmed.ends_with("/api") {
+        trimmed.to_string()
+    } else {
+        format!("{trimmed}/api")
+    }
+}
+
+fn ollama_endpoint(base_url: &str, path: &str) -> String {
+    format!(
+        "{}/{}",
+        normalize_ollama_base_url(base_url),
+        path.trim_start_matches('/')
+    )
+}
+
+fn is_local_ollama_url(base_url: &str) -> bool {
+    let lower = base_url.to_lowercase();
+    lower.starts_with("http://localhost:")
+        || lower.starts_with("http://127.0.0.1:")
+        || lower.starts_with("http://[::1]:")
+}
+
+fn default_local_ai_settings() -> LocalAiSettings {
+    LocalAiSettings {
+        enabled: false,
+        provider: "ollama".to_string(),
+        base_url: "http://localhost:11434/api".to_string(),
+        selected_model: None,
+        updated_at: chrono_like_now(),
+    }
+}
+
+fn parse_ollama_tags(value: Value) -> Vec<OllamaModel> {
+    value
+        .get("models")
+        .and_then(|models| models.as_array())
+        .map(|models| {
+            models
+                .iter()
+                .filter_map(|model| {
+                    let name = model.get("name")?.as_str()?.to_string();
+                    Some(OllamaModel {
+                        name,
+                        size: model.get("size").and_then(|size| size.as_i64()),
+                        modified_at: model
+                            .get("modified_at")
+                            .and_then(|modified_at| modified_at.as_str())
+                            .map(ToString::to_string),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn friendly_ollama_error(error: reqwest::Error) -> String {
+    if error.is_timeout() {
+        return "本地模型响应超时，请检查 Ollama 是否仍在运行。".to_string();
+    }
+    if error.is_connect() {
+        return "未检测到 Ollama，请先安装并启动 Ollama。".to_string();
+    }
+    if error.is_decode() {
+        return "Ollama 返回内容解析失败，请检查 API 地址是否正确。".to_string();
+    }
+    "本地模型响应失败，请检查 Ollama 是否仍在运行。".to_string()
 }
 
 #[tauri::command]
@@ -190,6 +301,152 @@ fn set_app_meta(key: String, value: String, db: State<DbState>) -> Result<(), St
     )
     .map_err(|error| error.to_string())?;
     Ok(())
+}
+
+#[tauri::command]
+fn get_local_ai_settings(db: State<DbState>) -> Result<LocalAiSettings, String> {
+    let conn = db.conn.lock().map_err(|_| "读取本地 AI 配置失败".to_string())?;
+    let value: Option<String> = conn
+        .query_row(
+            "SELECT value FROM local_ai_settings WHERE key = 'ollama'",
+            [],
+            |row| row.get(0),
+        )
+        .optional()
+        .map_err(|error| error.to_string())?;
+
+    match value {
+        Some(value) => serde_json::from_str(&value).map_err(|_| "本地 AI 配置解析失败".to_string()),
+        None => Ok(default_local_ai_settings()),
+    }
+}
+
+#[tauri::command]
+fn save_local_ai_settings(settings: LocalAiSettings, db: State<DbState>) -> Result<(), String> {
+    let conn = db.conn.lock().map_err(|_| "保存本地 AI 配置失败".to_string())?;
+    let normalized = LocalAiSettings {
+        provider: "ollama".to_string(),
+        base_url: normalize_ollama_base_url(&settings.base_url),
+        updated_at: chrono_like_now(),
+        ..settings
+    };
+    let value = serde_json::to_string(&normalized).map_err(|error| error.to_string())?;
+    conn.execute(
+        "INSERT INTO local_ai_settings (key, value, updated_at)
+         VALUES ('ollama', ?1, ?2)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+        params![value, normalized.updated_at],
+    )
+    .map_err(|error| error.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn detect_ollama_status(
+    base_url: String,
+    selected_model: Option<String>,
+) -> Result<OllamaStatus, String> {
+    let normalized = normalize_ollama_base_url(&base_url);
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(8))
+        .build()
+        .map_err(|_| "初始化本地 AI 请求失败".to_string())?;
+
+    let response = client
+        .get(ollama_endpoint(&normalized, "tags"))
+        .send()
+        .await
+        .map_err(friendly_ollama_error)?;
+
+    if !response.status().is_success() {
+        return Ok(OllamaStatus {
+            status: "error".to_string(),
+            base_url: normalized,
+            models: vec![],
+            selected_model,
+            error_message: Some("Ollama API 返回异常，请检查地址是否正确。".to_string()),
+        });
+    }
+
+    let value: Value = response.json().await.map_err(friendly_ollama_error)?;
+    let models = parse_ollama_tags(value);
+    if models.is_empty() {
+        return Ok(OllamaStatus {
+            status: "unavailable".to_string(),
+            base_url: normalized,
+            models,
+            selected_model,
+            error_message: Some(
+                "当前没有本地模型，请先在终端运行：ollama pull qwen3:0.6b".to_string(),
+            ),
+        });
+    }
+
+    let selected_exists = selected_model
+        .as_ref()
+        .map(|selected| models.iter().any(|model| model.name == *selected))
+        .unwrap_or(true);
+
+    Ok(OllamaStatus {
+        status: if selected_exists { "available" } else { "error" }.to_string(),
+        base_url: normalized,
+        models,
+        selected_model,
+        error_message: if selected_exists {
+            None
+        } else {
+            Some("当前模型不可用，请重新选择模型。".to_string())
+        },
+    })
+}
+
+#[tauri::command]
+async fn ollama_chat(
+    base_url: String,
+    model: String,
+    messages: Vec<OllamaChatMessage>,
+) -> Result<String, String> {
+    if model.trim().is_empty() {
+        return Err("请先选择本地模型。".to_string());
+    }
+    if messages.is_empty() {
+        return Err("请输入要发送给本地模型的内容。".to_string());
+    }
+
+    let normalized = normalize_ollama_base_url(&base_url);
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(60))
+        .build()
+        .map_err(|_| "初始化本地 AI 请求失败".to_string())?;
+    let response = client
+        .post(ollama_endpoint(&normalized, "chat"))
+        .json(&serde_json::json!({
+            "model": model,
+            "messages": messages,
+            "stream": false
+        }))
+        .send()
+        .await
+        .map_err(friendly_ollama_error)?;
+
+    if !response.status().is_success() {
+        return Err("本地模型响应失败，请检查 Ollama 是否仍在运行。".to_string());
+    }
+
+    let value: Value = response.json().await.map_err(friendly_ollama_error)?;
+    let content = value
+        .get("message")
+        .and_then(|message| message.get("content"))
+        .and_then(|content| content.as_str())
+        .map(str::trim)
+        .filter(|content| !content.is_empty())
+        .ok_or_else(|| "模型返回空内容，请稍后重试。".to_string())?;
+    Ok(content.to_string())
+}
+
+#[tauri::command]
+fn is_local_ollama_base_url(base_url: String) -> bool {
+    is_local_ollama_url(&base_url)
 }
 
 #[tauri::command]
@@ -549,6 +806,11 @@ pub fn run() {
             get_storage_info,
             get_app_meta,
             set_app_meta,
+            get_local_ai_settings,
+            save_local_ai_settings,
+            detect_ollama_status,
+            ollama_chat,
+            is_local_ollama_base_url,
             list_reminders,
             save_reminder,
             delete_reminder,

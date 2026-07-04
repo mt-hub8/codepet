@@ -12,6 +12,8 @@ logs/
 sounds/
 user-sounds/
 appData/
+chat-records/
+local-chat/
 .DS_Store
 .idea/
 .vscode/

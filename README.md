@@ -2,7 +2,7 @@
 
 CodePet 是一个本地优先（Local-first，优先在用户本机保存和运行）、轻量、可扩展的 AI 桌面伙伴。它的早期目标是做成一个别人可以下载、安装、运行的桌宠提醒工具；长期目标是扩展为支持本地模型、Codex / Cursor / Claude Code 任务监控、角色化记忆、Skill（技能）系统、多角色讨论和 Roundtable（圆桌会议）工作流的 Desktop Agent Companion（桌面 Agent 伙伴）。
 
-当前状态：early MVP（早期最小可行版本）。当前已完成 V0.2 Local Reminder System（本地提醒系统），优先支持 Windows，macOS / Linux 后续兼容。
+当前状态：early MVP（早期最小可行版本）。当前已完成 V0.3 Local AI via Ollama（通过 Ollama 接入本地模型），优先支持 Windows，macOS / Linux 后续兼容。
 
 CodePet 适合这些用户：
 
@@ -11,7 +11,7 @@ CodePet 适合这些用户：
 - 想要轻量本地 AI 陪伴工具的用户。
 - 想要参与开源、可扩展桌面 Agent 项目的开发者。
 
-## 当前 V0.2 做了什么
+## 当前 V0.3 做了什么
 
 - 建立 Tauri v2 + React + TypeScript 的桌面应用骨架。
 - 实现一个小尺寸、尽量无边框的 CodePet 桌面窗口。
@@ -28,9 +28,14 @@ CodePet 适合这些用户：
 - 支持提醒触发、完成、稍后提醒、忽略和最近提醒历史。
 - 使用 SQLite 在本机保存提醒配置、提醒历史和提示音配置。
 - 支持默认提示音、自定义提示音导入、试听、删除和按提醒绑定提示音。
+- 支持检测本机 Ollama 服务和本地模型列表。
+- 支持配置 Ollama API 地址、启用 / 关闭本地 AI、选择默认模型。
+- 支持本地聊天面板，用于验证模型可用性和基础陪伴对话。
+- 支持在提醒表单中使用本地 AI 生成或改写提醒文案。
+- 本地 AI 不是强依赖；没有安装或启动 Ollama 时，CodePet 仍可作为提醒工具使用。
 - 建立清晰的模块目录，为 reminders、tasks、characters、personas、skills、memory、workflows、integrations、storage 预留边界。
 - 补充 README、架构文档、路线图、隐私说明、发布说明和 GitHub Desktop 工作流说明。
-- 预留 Ollama、Codex、Cursor、Claude Code 集成目录，但不接入真实功能。
+- Ollama 已在 V0.3 接入为本地模型适配器；Codex、Cursor、Claude Code 仍只预留目录和文档。
 - 增加 GitHub Actions 基础检查骨架。
 
 ## 本地启动开发版
@@ -53,7 +58,7 @@ pnpm tauri dev
 ## 当前暂不支持
 
 - 暂未发布安装包。
-- 暂未内置本地模型。
+- 暂未内置或自动下载本地模型。
 - 暂未接入 Codex / Cursor / Claude Code。
 - 暂未实现记忆系统。
 - 暂未实现多角色圆桌会议。
@@ -65,7 +70,7 @@ CodePet 后续会逐步支持：
 
 - 桌宠提醒。
 - 喝水 / 休息 / 学习 / 工作提醒。
-- Ollama 本地模型。
+- 更完整的 Ollama 本地模型体验。
 - Codex CLI 任务监控。
 - Cursor CLI 任务监控。
 - Claude Code CLI 任务监控。
@@ -79,6 +84,8 @@ CodePet 后续会逐步支持：
 - GitHub Release 安装包分发。
 
 提示音说明：V0.2 的提示音默认在本地播放，用户导入的音频文件会复制到本机应用数据目录，不上传。请不要把用户导入的音频文件提交到 GitHub。
+
+本地 AI 说明：V0.3 默认只连接 `http://localhost:11434/api`。CodePet 不内置云 API Key，不会自动上传聊天、提醒、代码或本地文件。如果你把 Ollama API 地址改成远程地址，请自行确认隐私风险。
 
 详细版本链见 [docs/roadmap.md](docs/roadmap.md)。
 

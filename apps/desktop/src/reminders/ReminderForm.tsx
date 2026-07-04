@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ReminderSoundPicker } from "./ReminderSoundPicker";
+import type { ReminderPromptTone } from "../integrations/ollama/ollamaService";
 import type { ReminderSound } from "./reminderSoundTypes";
 import type { Reminder, ReminderMode, ReminderType } from "./reminderTypes";
 import { reminderTypeLabels } from "./reminderTypes";
@@ -13,6 +14,13 @@ type ReminderFormProps = {
   onImportSound: () => void;
   onPlaySound: (sound: ReminderSound) => void;
   onDeleteSound: (sound: ReminderSound) => void;
+  onGenerateMessage?: (input: {
+    title: string;
+    reminderType: ReminderType;
+    message?: string;
+    tone: ReminderPromptTone;
+  }) => Promise<string>;
+  aiEnabled: boolean;
 };
 
 const reminderTypes = Object.keys(reminderTypeLabels) as ReminderType[];
@@ -42,6 +50,8 @@ export function ReminderForm({
   onImportSound,
   onPlaySound,
   onDeleteSound,
+  onGenerateMessage,
+  aiEnabled,
 }: ReminderFormProps) {
   const [draft, setDraft] = useState<Reminder>(createBlankReminder);
   const [error, setError] = useState("");
@@ -59,6 +69,24 @@ export function ReminderForm({
       setError("");
     } catch (error) {
       setError(error instanceof Error ? error.message : "保存提醒失败");
+    }
+  }
+
+  async function handleGenerateMessage(tone: ReminderPromptTone) {
+    if (!onGenerateMessage) {
+      return;
+    }
+    try {
+      const message = await onGenerateMessage({
+        title: draft.title,
+        reminderType: draft.reminderType,
+        message: draft.message,
+        tone,
+      });
+      setDraft({ ...draft, message });
+      setError("");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "AI 文案生成失败，已保留原文案。");
     }
   }
 
@@ -137,6 +165,25 @@ export function ReminderForm({
         />
       </label>
 
+      <div className="ai-message-actions" aria-label="AI 提醒文案">
+        <button type="button" disabled={!aiEnabled} onClick={() => void handleGenerateMessage("generate")}>
+          让 AI 帮我生成提醒文案
+        </button>
+        <button type="button" disabled={!aiEnabled} onClick={() => void handleGenerateMessage("gentle")}>
+          改得更温柔
+        </button>
+        <button type="button" disabled={!aiEnabled} onClick={() => void handleGenerateMessage("strict")}>
+          改得更严格
+        </button>
+        <button type="button" disabled={!aiEnabled} onClick={() => void handleGenerateMessage("cute")}>
+          改得更可爱
+        </button>
+        <button type="button" disabled={!aiEnabled} onClick={() => void handleGenerateMessage("short")}>
+          改得更简短
+        </button>
+      </div>
+      {!aiEnabled && <p className="empty-text">本地 AI 未启用或未选择模型，AI 文案按钮暂不可用。</p>}
+
       <label className="check-row">
         <input
           type="checkbox"
@@ -168,4 +215,3 @@ export function ReminderForm({
     </form>
   );
 }
-

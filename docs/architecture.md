@@ -1,51 +1,41 @@
 # 架构原则
 
-CodePet 的架构目标是轻量、本地优先、模块化、可扩展。V0.0 不实现复杂业务，只先把边界放清楚，避免后续把所有逻辑堆进 UI 或桌宠入口。
-
-V0.1 在这个基础上加入 Desktop Pet Shell MVP（桌宠壳子 MVP）：小尺寸桌面窗口、拖动、置顶、托盘、关闭隐藏到托盘、基础状态和气泡展示。
-
-V0.2 加入 Local Reminder System（本地提醒系统）：提醒配置、轻量调度、触发历史、SQLite 本地持久化和本地提示音。它仍然不包含本地模型、外部 Agent 监控、记忆或多角色工作流。
+CodePet 的架构目标是轻量、本地优先、模块化、可扩展。桌宠是入口，不是所有业务逻辑的容器。
 
 ## 核心原则
 
-1. Core（核心层）保持轻量，只负责启动、模块编排、基础事件和必要配置。
-2. UI 不直接写业务逻辑。React 组件负责展示和交互，业务规则放在对应模块中。
-3. Local-first（本地优先）是默认方向：用户数据、提醒、任务历史和记忆应优先保存在本机。
+1. Core（核心层）保持轻量，只负责启动、基础配置和模块编排。
+2. UI 不直接写数据库、模型调用或外部工具监控逻辑。
+3. Local-first（本地优先）是默认方向，提醒、提示音、本地 AI 配置优先保存在用户本机。
 4. 功能模块化，每个能力有清晰目录和边界。
-5. 事件驱动。模块之间优先通过事件传递状态，而不是互相直接调用内部实现。
-6. 高级能力通过 Feature Flag（功能开关）控制，默认关闭实验性能力。
-7. 默认体验必须简单，普通提醒用户不应该被复杂 Agent 能力打扰。
-8. 桌宠只是入口，不是所有业务逻辑的垃圾桶。
+5. 高级能力通过 Feature Flag（功能开关）或显式设置控制。
+6. 默认体验必须简单，没有 Ollama 时 CodePet 仍然可以作为提醒工具使用。
+7. 外部能力必须通过 Adapter（适配器）或 service（服务层）接入，不写死在 UI 组件里。
 
-## 模块边界
+## 当前模块边界
 
-- `reminders`：提醒模块，负责提醒配置、默认模板、轻量调度、触发历史、提示音配置和提醒管理 UI。
-- `tasks`：任务模块，后续记录用户主动或外部 Agent 启动的任务。
-- `pet`：桌宠展示模块，V0.1 负责桌宠状态、气泡 UI、状态测试面板和拖动触发。
-- `characters`：Character（角色外观）模块，只关注视觉状态和资源。V0.1 只放默认占位外观。
-- `personas`：Persona（人格设定）模块，关注说话方式和人格配置。
-- `skills`：Skill（技能）模块，关注可配置能力和权限边界。
-- `memory`：记忆模块，后续负责本地记忆管理、查看、删除和导出。
-- `workflows`：Workflow（工作流）模块，后续承载多步骤任务和多角色协作。
-- `integrations`：外部工具集成模块。
-- `storage`：本地存储模块，后续统一管理 SQLite 和文件存储。V0.2 的 SQLite 初始化暂时由 Tauri / Rust 侧完成，前端通过 `reminderStorage` 调用命令。
-- `shared`：通用类型和服务封装。V0.1 中窗口拖动、置顶等桌面能力通过 `desktopWindowService` 访问。
+- `app`：应用入口、全局布局。
+- `pet`：桌宠展示、状态、气泡 UI 和桌面交互入口。
+- `characters`：角色外观占位和后续扩展。
+- `reminders`：提醒配置、默认模板、轻量调度、触发历史、提示音配置和提醒管理 UI。
+- `integrations/ollama`：Ollama 本地模型适配器，负责配置、检测、聊天和 AI 提醒文案生成。
+- `storage`：后续统一承载本地存储抽象。当前 SQLite 初始化和访问在 Tauri / Rust 侧，前端通过 service 调用命令。
+- `shared`：通用服务封装，例如桌面窗口能力。
 
-## V0.1 桌面能力边界
+## V0.1 桌宠壳子
 
-V0.1 的置顶、显示、隐藏、关闭隐藏到托盘、退出等能力由 Tauri / Rust 侧承载。前端通过轻量服务调用命令，不直接关心平台细节。
+V0.1 的置顶、显示、隐藏、关闭隐藏到托盘、退出等能力由 Tauri / Rust 侧承载。前端通过 `desktopWindowService` 调用命令，不直接关心平台细节。
 
-状态演示使用 `PetState` 类型：
+桌宠状态使用 `PetState`：
 
 - `idle`：待机。
 - `focusing`：专注。
+- `thinking`：思考。
 - `reminding`：提醒。
 - `success`：完成。
 - `warning`：警告。
 
-这些状态当前只用于 UI 演示，不触发真实提醒、调度或任务监控。
-
-## V0.2 提醒模块边界
+## V0.2 提醒模块
 
 V0.2 的提醒链路分层如下：
 
@@ -54,44 +44,37 @@ V0.2 的提醒链路分层如下：
 - `reminderStorage` 负责调用 Tauri 命令，不直接暴露数据库。
 - `reminderScheduler` 只负责检查到期提醒和触发统一回调，不直接写 UI。
 - `pet` 负责展示状态和气泡，不保存提醒业务数据。
-- SQLite 表包括 `reminders`、`reminder_events`、`reminder_sounds`、`app_meta`。
 
-提示音边界：
+SQLite 表包括：
 
-- `ReminderSoundPicker` 只负责提示音选择 UI。
-- `reminderSoundService` 负责导入、删除、试听、查询。
-- `reminderAudioPlayer` 负责播放内置提示音或本地音频文件。
-- `reminderScheduler` 触发提醒时只调用统一播放接口，不处理文件导入逻辑。
+- `reminders`
+- `reminder_events`
+- `reminder_sounds`
+- `app_meta`
 
-后续可以支持 AI 语音提醒、每个角色绑定不同声音、本地 TTS（文本转语音）或用户自定义语音包。AI 语音必须是可选功能，不能影响 CodePet 的轻量默认体验。如果后续使用云端 TTS，隐私文档必须明确说明数据会外发；如果使用本地 TTS，需要考虑模型体积、生成延迟和缓存机制。
+## V0.3 Ollama 本地 AI
 
-`Codex`、`Cursor`、`Claude Code` 都属于 `integrations` 下的外部 Agent 适配器。后续任何外部 Agent 接入都应该通过统一 Adapter（适配器）接口，而不是把逻辑写死在 UI 组件里。
+`integrations/ollama` 是外部本地模型适配器。
 
-## 外部 Agent Adapter 方向
+- `ollamaClient`：只负责调用 Tauri 命令。
+- `ollamaService`：负责状态检测、模型列表、聊天、AI 提醒文案生成和错误转换。
+- `ollamaSettingsStorage`：负责本地 AI 配置持久化。
+- `OllamaSettingsPanel`：负责设置 UI。
+- `LocalChatPanel`：负责聊天 UI。
 
-后续 Adapter 可以统一暴露：
+Ollama HTTP 请求封装在 Tauri / Rust 侧，前端不直接请求 Ollama。这样可以避免浏览器 CORS 问题，也能把“只请求用户配置的 Ollama 地址”集中在后端命令中。
 
-- `startTask`
-- `stopTask`
-- `getStatus`
-- `readLogs`
-- `detectNeedsUserInput`
+本地 AI 配置保存在 SQLite 的 `local_ai_settings` 表中。默认地址是：
 
-Codex / Cursor / Claude Code / Generic Command Monitor（通用命令监控）都应该走同一类接口，方便 UI、提醒模块和任务模块复用。
+```text
+http://localhost:11434/api
+```
 
-## 通用事件类型草案
+提醒系统可以通过明确接口请求 AI 文案生成，但不能直接依赖 Ollama HTTP 细节。AI 生成的提醒文案只填入表单，必须由用户点击保存后才写入提醒配置。
 
-后续事件类型可以包括：
+## 后续边界
 
-- `ReminderTriggered`
-- `TaskStarted`
-- `TaskCompleted`
-- `TaskFailed`
-- `AgentNeedsUserInput`
-- `AgentOutputReceived`
-- `MemoryCreated`
-- `SkillSuggested`
-- `WorkflowStarted`
-- `RoundtableStarted`
+Codex / Cursor / Claude Code 属于后续 `integrations` 下的外部 Agent 适配器。它们不属于 V0.3。
 
-这些事件只是 V0.0 的设计草案，不代表当前已经实现。
+后续可以支持 AI 语音、每个角色绑定不同声音、本地 TTS（文本转语音）或用户自定义语音包。但 AI 语音必须是可选功能，不能影响 CodePet 的轻量默认体验。如果后续使用云端 TTS，隐私文档必须明确说明数据会外发；如果使用本地 TTS，需要考虑模型体积、生成延迟和缓存机制。
+

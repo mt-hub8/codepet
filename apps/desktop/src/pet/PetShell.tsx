@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { LocalChatPanel } from "../integrations/ollama/LocalChatPanel";
+import { OllamaSettingsPanel } from "../integrations/ollama/OllamaSettingsPanel";
+import { ollamaService, type ReminderPromptTone } from "../integrations/ollama/ollamaService";
+import type { LocalAiSettings, OllamaStatus } from "../integrations/ollama/ollamaTypes";
 import { ReminderPanel } from "../reminders/ReminderPanel";
 import { checkDueReminder } from "../reminders/reminderScheduler";
 import { reminderService } from "../reminders/reminderService";
@@ -16,6 +20,22 @@ import { PetBubble } from "./PetBubble";
 import { PetStatusPanel } from "./PetStatusPanel";
 import type { PetState } from "./petState";
 
+type WorkspaceTab = "reminders" | "ai-settings" | "chat";
+
+const defaultOllamaStatus: OllamaStatus = {
+  status: "checking",
+  baseUrl: "http://localhost:11434/api",
+  models: [],
+};
+
+const defaultLocalAiSettings: LocalAiSettings = {
+  enabled: false,
+  provider: "ollama",
+  baseUrl: "http://localhost:11434/api",
+  selectedModel: undefined,
+  updatedAt: new Date().toISOString(),
+};
+
 export function PetShell() {
   const [petState, setPetState] = useState<PetState>("idle");
   const [manualPetState, setManualPetState] = useState<PetState>("idle");
@@ -27,6 +47,12 @@ export function PetShell() {
   const [activeReminder, setActiveReminder] = useState<Reminder | null>(null);
   const [activeMessage, setActiveMessage] = useState("");
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>("reminders");
+  const [localAiSettings, setLocalAiSettings] =
+    useState<LocalAiSettings>(defaultLocalAiSettings);
+  const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus>(defaultOllamaStatus);
+  const [isCheckingOllama, setIsCheckingOllama] = useState(false);
+  const [isRemoteBaseUrl, setIsRemoteBaseUrl] = useState(false);
 
   const displayedState = activeReminder ? "reminding" : petState;
   const activeTitle = useMemo(() => activeReminder?.title ?? "当前提醒", [activeReminder]);
@@ -51,6 +77,22 @@ export function PetShell() {
       .initializeDefaultsOnce()
       .then(refreshAll)
       .catch((error) => setError(error instanceof Error ? error.message : "初始化提醒失败"));
+
+    ollamaService
+      .getSettings()
+      .then((settings) => {
+        setLocalAiSettings(settings);
+        setOllamaStatus({ ...defaultOllamaStatus, baseUrl: settings.baseUrl });
+        return Promise.all([
+          ollamaService.isLocalBaseUrl(settings.baseUrl),
+          ollamaService.detectStatus(settings),
+        ]);
+      })
+      .then(([isLocal, status]) => {
+        setIsRemoteBaseUrl(!isLocal);
+        setOllamaStatus(status);
+      })
+      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -110,6 +152,51 @@ export function PetShell() {
     await refreshAll();
   }
 
+  async function handleDetectOllama() {
+    setIsCheckingOllama(true);
+    setOllamaStatus({ ...ollamaStatus, status: "checking", errorMessage: undefined });
+    try {
+      const [isLocal, status] = await Promise.all([
+        ollamaService.isLocalBaseUrl(localAiSettings.baseUrl),
+        ollamaService.detectStatus(localAiSettings),
+      ]);
+      setIsRemoteBaseUrl(!isLocal);
+      setOllamaStatus(status);
+    } finally {
+      setIsCheckingOllama(false);
+    }
+  }
+
+  async function handleSaveLocalAiSettings() {
+    await ollamaService.saveSettings(localAiSettings);
+    await handleDetectOllama();
+  }
+
+  async function handleGenerateReminderMessage(input: {
+    title: string;
+    reminderType: Reminder["reminderType"];
+    message?: string;
+    tone: ReminderPromptTone;
+  }) {
+    setPetState("thinking");
+    setActiveMessage("我在请本地模型帮你写提醒文案。");
+    try {
+      const message = await ollamaService.generateReminderMessage(localAiSettings, input);
+      setPetState("success");
+      setActiveMessage(message);
+      window.setTimeout(() => {
+        if (!activeReminder) {
+          setPetState(manualPetState);
+          setActiveMessage("");
+        }
+      }, 2000);
+      return message;
+    } catch (error) {
+      setPetState("warning");
+      throw error;
+    }
+  }
+
   async function handleImportSound() {
     const sound = await reminderSoundService.importSound();
     if (sound) {
@@ -158,6 +245,8 @@ export function PetShell() {
     }
   }
 
+  const aiReady = Boolean(localAiSettings.enabled && localAiSettings.selectedModel);
+
   return (
     <main className={`pet-shell pet-shell-${displayedState}`}>
       <header
@@ -201,21 +290,84 @@ export function PetShell() {
         </section>
       )}
 
-      <ReminderPanel
-        reminders={reminders}
-        events={events}
-        sounds={sounds}
-        editingReminder={editingReminder}
-        onEdit={setEditingReminder}
-        onSave={handleSave}
-        onToggle={handleToggleReminder}
-        onDelete={handleDeleteReminder}
-        onRestoreDefaults={handleRestoreDefaults}
-        onImportSound={handleImportSound}
-        onPlaySound={(sound) => void reminderSoundService.playSound(sound)}
-        onDeleteSound={handleDeleteSound}
-      />
+      <nav className="workspace-tabs" aria-label="功能入口">
+        <button
+          type="button"
+          className={activeTab === "reminders" ? "active" : ""}
+          onClick={() => setActiveTab("reminders")}
+        >
+          本地提醒
+        </button>
+        <button
+          type="button"
+          className={activeTab === "ai-settings" ? "active" : ""}
+          onClick={() => setActiveTab("ai-settings")}
+        >
+          本地 AI 设置
+        </button>
+        <button
+          type="button"
+          className={activeTab === "chat" ? "active" : ""}
+          onClick={() => setActiveTab("chat")}
+        >
+          本地聊天
+        </button>
+      </nav>
+
+      {activeTab === "reminders" && (
+        <ReminderPanel
+          reminders={reminders}
+          events={events}
+          sounds={sounds}
+          editingReminder={editingReminder}
+          onEdit={setEditingReminder}
+          onSave={handleSave}
+          onToggle={handleToggleReminder}
+          onDelete={handleDeleteReminder}
+          onRestoreDefaults={handleRestoreDefaults}
+          onImportSound={handleImportSound}
+          onPlaySound={(sound) => void reminderSoundService.playSound(sound)}
+          onDeleteSound={handleDeleteSound}
+          onGenerateReminderMessage={handleGenerateReminderMessage}
+          aiEnabled={aiReady}
+        />
+      )}
+
+      {activeTab === "ai-settings" && (
+        <OllamaSettingsPanel
+          settings={localAiSettings}
+          status={ollamaStatus}
+          isChecking={isCheckingOllama}
+          isRemoteBaseUrl={isRemoteBaseUrl}
+          onSettingsChange={setLocalAiSettings}
+          onSave={handleSaveLocalAiSettings}
+          onDetect={handleDetectOllama}
+        />
+      )}
+
+      {activeTab === "chat" && (
+        <LocalChatPanel
+          settings={localAiSettings}
+          onThinking={() => {
+            setPetState("thinking");
+            setActiveMessage("我在问本地模型，稍等一下。");
+          }}
+          onReply={(reply) => {
+            setPetState("success");
+            setActiveMessage(reply.slice(0, 60));
+            window.setTimeout(() => {
+              if (!activeReminder) {
+                setPetState(manualPetState);
+                setActiveMessage("");
+              }
+            }, 2400);
+          }}
+          onError={(message) => {
+            setPetState("warning");
+            setError(message);
+          }}
+        />
+      )}
     </main>
   );
 }
-
