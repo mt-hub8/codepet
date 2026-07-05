@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "CodePet",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "identifier": "dev.codepet.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -27,6 +27,13 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all"
+    "targets": ["msi", "nsis"],
+    "shortDescription": "本地优先 AI 桌面伙伴",
+    "longDescription": "CodePet 是一个本地优先的 AI 桌面伙伴。当前为 Local Alpha 版本。",
+    "windows": {
+      "wix": {
+        "language": "zh-CN"
+      }
+    }
   }
 }

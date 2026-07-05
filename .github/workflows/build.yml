@@ -28,8 +28,6 @@ jobs:
       - name: Build frontend
         run: pnpm --filter @codepet/desktop build
 
-      # V0.0 暂时只验证前端构建。Tauri build 需要完整 Rust、系统依赖和签名/打包环境，
-      # 后续到 V0.6 Windows 安装包阶段再启用正式打包检查。
-      # - name: Build Tauri app
-      #   run: pnpm --filter @codepet/desktop tauri build
+      # V0.6 起，正式安装包由 release.yml 构建并发布到 GitHub Releases。
+      # 日常 CI 仅验证前端构建，避免 PR 触发完整 Tauri 打包。
 

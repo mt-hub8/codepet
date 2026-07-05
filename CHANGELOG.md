@@ -2,6 +2,14 @@
 
 所有重要变更会记录在这个文件中。
 
+## 0.6.0
+
+- 新增 GitHub Actions `release.yml`：支持 tag `v*` 与 `workflow_dispatch` 触发 Windows 安装包构建。
+- Windows 发布产物：WiX `.msi` 与 NSIS `-setup.exe`（推荐 MSI）。
+- 同步版本号至 0.6.0；补充占位应用图标（后续替换正式图标）。
+- 更新 README 下载区、install.md、release.md、privacy.md、roadmap.md。
+- 不新增产品功能；不包含用户运行期数据。
+
 ## 0.5.0
 
 - 本地 Alpha 收敛：整合 Agent CLI 监控、接管提醒、依赖检测 Lite、宠物孵化向导、工作状态中心、基础行为记忆、新手引导 Lite。

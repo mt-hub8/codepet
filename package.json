@@ -1,6 +1,6 @@
 {
   "name": "codepet",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "private": true,
   "description": "CodePet 本地优先 AI 桌面伙伴开源骨架",
   "scripts": {

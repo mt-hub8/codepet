@@ -1,0 +1,88 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag（例如 v0.6.0）"
+        required: true
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and publish Windows installer
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          tagName: ${{ github.event.inputs.tag || github.ref_name }}
+          releaseName: CodePet ${{ github.event.inputs.tag || github.ref_name }} Local Alpha
+          releaseBody: |
+            ## CodePet ${{ github.event.inputs.tag || github.ref_name }} Local Alpha
+
+            本版本为**本地 Alpha 预发布**版本，适合愿意尝鲜的 Windows 用户。
+
+            ### 下载（Windows）
+            - **推荐**：`.msi` 安装包（WiX）
+            - **备选**：`*-setup.exe`（NSIS 安装程序）
+
+            macOS / Linux 安装包暂未正式提供。
+
+            ### 主要功能
+            - 桌宠悬浮窗口
+            - 本地提醒与自定义提示音
+            - Ollama 本地 AI
+            - 命令 / Agent 任务监控
+            - 宠物素材导入与孵化提示词向导
+            - 工作状态中心与基础行为记忆
+            - 新手引导 Lite
+
+            ### 安装提示
+            - 当前**未代码签名**，Windows 可能提示未知发布者，请选择「更多信息」后继续
+            - 请仅从本项目 GitHub Releases 下载，不要从第三方来源下载
+
+            ### 已知问题
+            - Ollama、Codex、Cursor、Claude Code 需用户自行安装与配置
+            - 宠物素材版权由用户自行确认
+            - Alpha 版本可能存在兼容性问题
+
+            ### 隐私
+            默认本地运行，不上传用户代码、命令、日志、聊天、提醒、宠物素材与基础记忆。详见 [docs/privacy.md](https://github.com/${{ github.repository }}/blob/main/docs/privacy.md)。
+
+            完整变更见 [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)。
+          releaseDraft: true
+          prerelease: true
+          args: ""
