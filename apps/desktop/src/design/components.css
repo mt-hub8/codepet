@@ -1014,6 +1014,120 @@
   margin-top: 4px;
 }
 
+.dependency-lite-note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.page-header-with-back {
+  display: grid;
+  gap: 10px;
+}
+
+.work-status-summary-grid,
+.work-status-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.work-status-metrics > div {
+  display: grid;
+  gap: 4px;
+  min-width: 88px;
+}
+
+.work-status-metrics strong {
+  font-size: 20px;
+}
+
+.work-event-list,
+.basic-memory-list {
+  display: grid;
+  gap: 10px;
+}
+
+.work-event-item,
+.basic-memory-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.work-event-item span,
+.basic-memory-item span {
+  display: block;
+  color: var(--cp-text-muted);
+  font-size: 12px;
+}
+
+.pet-hatch-form {
+  display: grid;
+  gap: 12px;
+}
+
+.pet-hatch-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.pet-hatch-form input,
+.pet-hatch-form textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: 10px;
+  font: inherit;
+}
+
+.pet-hatch-template-grid,
+.pet-hatch-example-grid,
+.pet-hatch-actions,
+.onboarding-actions-row,
+.onboarding-pet-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pet-hatch-prompt-output {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 360px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--cp-surface-soft);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(255, 250, 245, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.onboarding-card {
+  width: min(720px, 100%);
+  display: grid;
+  gap: 14px;
+}
+
+.onboarding-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;

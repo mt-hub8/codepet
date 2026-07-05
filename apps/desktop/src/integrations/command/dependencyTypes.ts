@@ -4,6 +4,7 @@ export type DependencyItemId =
   | "git"
   | "node"
   | "pnpm"
+  | "ollama"
   | "codex"
   | "cursor"
   | "claude_code";

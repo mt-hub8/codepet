@@ -1,10 +1,12 @@
 import { dependencyStorage } from "./dependencyStorage";
 import { AGENT_TOOL_SETTING_KEYS, type DependencyItem, type DependencyItemId } from "./dependencyTypes";
+import { ollamaClient } from "../ollama/ollamaClient";
 
 const BASE_DEPENDENCIES: Array<Omit<DependencyItem, "status" | "version" | "message">> = [
   { id: "git", name: "Git", detectCommand: "git", detectArgs: ["--version"] },
   { id: "node", name: "Node.js", detectCommand: "node", detectArgs: ["--version"] },
   { id: "pnpm", name: "pnpm", detectCommand: "pnpm", detectArgs: ["--version"] },
+  { id: "ollama", name: "Ollama", detectCommand: "http://localhost:11434/api", detectArgs: [] },
   { id: "codex", name: "Codex CLI", detectCommand: "codex", detectArgs: ["--version"] },
   { id: "cursor", name: "Cursor CLI", detectCommand: "cursor", detectArgs: ["--version"] },
   {
@@ -19,6 +21,7 @@ const customPathKeyMap: Record<DependencyItemId, string | undefined> = {
   git: undefined,
   node: undefined,
   pnpm: undefined,
+  ollama: undefined,
   codex: AGENT_TOOL_SETTING_KEYS.codexExecutablePath,
   cursor: AGENT_TOOL_SETTING_KEYS.cursorExecutablePath,
   claude_code: AGENT_TOOL_SETTING_KEYS.claudeCodeExecutablePath,
@@ -28,6 +31,32 @@ async function detectOne(
   item: Omit<DependencyItem, "status" | "version" | "message">,
   customPath?: string,
 ): Promise<DependencyItem> {
+  if (item.id === "ollama") {
+    try {
+      const status = await ollamaClient.detectStatus("http://localhost:11434/api");
+      if (status.status === "available") {
+        const modelCount = status.models.length;
+        return {
+          ...item,
+          status: "detected",
+          version: modelCount > 0 ? `${modelCount} 个模型` : "已连接",
+          message: "已检测到本机 Ollama",
+        };
+      }
+      return {
+        ...item,
+        status: "not_detected",
+        message: status.errorMessage ?? "未检测到 Ollama，可先跳过",
+      };
+    } catch (error) {
+      return {
+        ...item,
+        status: "failed",
+        message: error instanceof Error ? error.message : "Ollama 检测失败",
+      };
+    }
+  }
+
   const executable = customPath?.trim() || item.detectCommand;
   if (!executable) {
     return {
@@ -76,6 +105,7 @@ export const dependencyDetection = {
       git: undefined,
       node: undefined,
       pnpm: undefined,
+      ollama: undefined,
       codex: codex ?? undefined,
       cursor: cursor ?? undefined,
       claude_code: claude ?? undefined,

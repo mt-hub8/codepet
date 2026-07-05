@@ -88,7 +88,13 @@ const navIconMap = {
   settings: IconSettings,
 } as const;
 
-export function NavIcon({ route, size = 18 }: { route: keyof typeof navIconMap; size?: number }) {
+export function NavIcon({
+  route,
+  size = 18,
+}: {
+  route: keyof typeof navIconMap;
+  size?: number;
+}) {
   const Icon = navIconMap[route];
   return <Icon size={size} />;
 }

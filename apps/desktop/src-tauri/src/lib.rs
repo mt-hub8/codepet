@@ -17,6 +17,7 @@ use tauri::{
 mod command_monitor;
 mod agent_tools;
 mod pet_assets;
+mod basic_memory;
 
 struct WindowState {
     always_on_top: Mutex<bool>,
@@ -221,6 +222,15 @@ fn init_database(app: &AppHandle) -> Result<Connection, String> {
           grid_json TEXT NOT NULL,
           animations_json TEXT NOT NULL,
           created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS basic_memory (
+          id TEXT PRIMARY KEY,
+          memory_type TEXT NOT NULL,
+          key TEXT NOT NULL,
+          value TEXT NOT NULL,
+          source TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
         ",
@@ -904,6 +914,9 @@ pub fn run() {
             pet_assets::delete_pet_asset,
             pet_assets::get_current_pet_id,
             pet_assets::set_current_pet_id,
+            basic_memory::list_basic_memory,
+            basic_memory::save_basic_memory,
+            basic_memory::delete_basic_memory,
             start_window_drag,
             get_always_on_top,
             toggle_always_on_top,

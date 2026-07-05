@@ -151,6 +151,14 @@ Rust `pet_assets` 模块将文件复制到 `{app_data}/codepet/pets/<id>/`，元
 
 默认不内置第三方社区素材。用户自行确认版权。不上传导入素材。
 
+## V0.5 本地 Alpha 模块
+
+- `work-status/`：工作状态中心与首页摘要。
+- `memory/`：基础行为记忆。
+- `onboarding/`：新手引导 Lite。
+- `characters/hatch/`：宠物孵化提示词向导（复用 V0.4.5 导入，不重做 parser / renderer）。
+- `integrations/command/DependencyCheckLite.tsx`：设置页轻量依赖检测。
+
 ## 外部 Agent 边界
 
 Codex / Cursor / Claude Code 适配器只负责构造命令和检测输出，不直接操作 UI，不自动确认权限，不自动执行 AI 生成的命令。用户可自定义 CLI 路径与等待确认关键词。未安装对应 CLI 时显示友好提示，应用不崩溃。

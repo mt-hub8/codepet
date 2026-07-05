@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useApp } from "../app/AppProvider";
 import type { PetImportPreviewState } from "./petAssetTypes";
 import { petAssetService } from "./petAssetService";
 import { PetAnimationPreview } from "./PetAnimationPreview";
@@ -9,6 +10,7 @@ type PetImportPanelProps = {
 };
 
 export function PetImportPanel({ onImported, onError }: PetImportPanelProps) {
+  const { navigate } = useApp();
   const [preview, setPreview] = useState<PetImportPreviewState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -100,6 +102,9 @@ export function PetImportPanel({ onImported, onError }: PetImportPanelProps) {
             disabled={isLoading || isImporting}
           >
             选择 pet.json
+          </button>
+          <button type="button" className="cp-btn" onClick={() => navigate("pet-hatch")}>
+            宠物孵化向导
           </button>
         </div>
       </div>

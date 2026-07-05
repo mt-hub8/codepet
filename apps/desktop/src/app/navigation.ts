@@ -1,4 +1,4 @@
-export type AppRoute =
+export type MainNavRoute =
   | "home"
   | "reminders"
   | "local-ai"
@@ -6,8 +6,10 @@ export type AppRoute =
   | "tasks"
   | "settings";
 
+export type AppRoute = MainNavRoute | "work-status" | "pet-hatch";
+
 export type NavItem = {
-  id: AppRoute;
+  id: MainNavRoute;
   label: string;
 };
 

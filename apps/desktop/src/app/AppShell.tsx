@@ -1,5 +1,6 @@
 import { startWindowDrag } from "../shared/desktopWindowService";
 import { Sidebar } from "../shared/components/Sidebar";
+import { OnboardingLiteModal } from "../onboarding/OnboardingLiteModal";
 import { AppRoutes } from "./AppRoutes";
 import { useApp } from "./AppProvider";
 
@@ -61,6 +62,7 @@ export function AppShell() {
           <AppRoutes />
         </main>
       </div>
+      <OnboardingLiteModal />
     </div>
   );
 }

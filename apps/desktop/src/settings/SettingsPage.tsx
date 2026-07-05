@@ -1,14 +1,25 @@
 import { PetStatusPanel } from "../pet/PetStatusPanel";
 import { useApp } from "../app/AppProvider";
+import { DependencyCheckLite } from "../integrations/command/DependencyCheckLite";
+import { BasicMemoryPanel } from "../memory/BasicMemoryPanel";
 
 export function SettingsPage() {
-  const { isAlwaysOnTop, togglePin, manualPetState, setManualPetState } = useApp();
+  const {
+    isAlwaysOnTop,
+    togglePin,
+    manualPetState,
+    setManualPetState,
+    basicMemories,
+    refreshBasicMemories,
+    handleDeleteBasicMemory,
+    setShowOnboarding,
+  } = useApp();
 
   return (
     <div className="page-stack">
       <header className="page-header">
         <h1>设置</h1>
-        <p>窗口、桌宠与本地模式相关的基础设置。</p>
+        <p>窗口、依赖检测、基础记忆与本地模式相关设置。</p>
       </header>
 
       <section className="cp-card settings-section">
@@ -18,6 +29,22 @@ export function SettingsPage() {
           {isAlwaysOnTop ? "取消置顶" : "窗口置顶"}
         </button>
       </section>
+
+      <section className="cp-card settings-section">
+        <h2>新手引导</h2>
+        <p>可随时重新打开轻量引导，每步都可跳过。</p>
+        <button type="button" className="cp-btn" onClick={() => setShowOnboarding(true)}>
+          重新打开新手引导
+        </button>
+      </section>
+
+      <DependencyCheckLite />
+
+      <BasicMemoryPanel
+        memories={basicMemories}
+        onRefresh={refreshBasicMemories}
+        onDelete={handleDeleteBasicMemory}
+      />
 
       <section className="cp-card settings-section">
         <h2>桌宠状态测试</h2>

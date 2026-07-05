@@ -30,6 +30,8 @@ import type { AppRoute } from "./navigation";
 import { DEFAULT_ROUTE } from "./navigation";
 import { BUILT_IN_PET_ID, builtInPetAsset, type PetAsset } from "../characters/petAssetTypes";
 import { petAssetService } from "../characters/petAssetService";
+import { memoryService } from "../memory/memoryService";
+import type { BasicMemory } from "../memory/memoryTypes";
 
 const defaultOllamaStatus: OllamaStatus = {
   status: "checking",
@@ -117,6 +119,12 @@ type AppContextValue = {
   refreshPetAssets: () => Promise<void>;
   handleSetCurrentPet: (petId: string) => Promise<void>;
   handleDeletePetAsset: (petId: string) => Promise<void>;
+  basicMemories: BasicMemory[];
+  refreshBasicMemories: () => Promise<void>;
+  handleDeleteBasicMemory: (id: string) => Promise<void>;
+  showOnboarding: boolean;
+  setShowOnboarding: (show: boolean) => void;
+  completeOnboarding: () => Promise<void>;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -145,6 +153,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [petAssets, setPetAssets] = useState<PetAsset[]>([builtInPetAsset]);
   const [currentPetId, setCurrentPetId] = useState(BUILT_IN_PET_ID);
   const [petAssetError, setPetAssetError] = useState("");
+  const [basicMemories, setBasicMemories] = useState<BasicMemory[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const lastOutputAtRef = useRef<Record<string, number>>({});
   const commandKeywordsRef = useRef<string[]>([]);
 
@@ -190,6 +200,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshBasicMemories = useCallback(async () => {
+    const memories = await memoryService.list();
+    setBasicMemories(memories);
+  }, []);
+
   const refreshCommandTasks = useCallback(async () => {
     const nextTasks = (await commandService.listTasks()).map(normalizeCommandTask);
     setCommandTasks(nextTasks);
@@ -202,7 +217,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refreshAll = useCallback(async () => {
     const [nextReminders, nextEvents, nextSounds] = await Promise.all([
       reminderService.listReminders(),
-      reminderService.listEvents(20),
+      reminderService.listEvents(50),
       reminderSoundService.listSounds(),
     ]);
     setReminders(nextReminders);
@@ -210,8 +225,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSounds(nextSounds);
     const nextTasks = (await commandService.listTasks()).map(normalizeCommandTask);
     setCommandTasks(nextTasks);
-    await refreshPetAssets();
-  }, [normalizeCommandTask, refreshPetAssets]);
+    await Promise.all([refreshPetAssets(), refreshBasicMemories()]);
+  }, [normalizeCommandTask, refreshPetAssets, refreshBasicMemories]);
 
   useEffect(() => {
     getAlwaysOnTop()
@@ -220,7 +235,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     reminderService
       .initializeDefaultsOnce()
-      .then(refreshAll)
+      .then(async () => {
+        await refreshAll();
+        const completed = await memoryService.isOnboardingCompleted();
+        if (!completed) {
+          setShowOnboarding(true);
+        }
+      })
       .catch((initError) =>
         setError(initError instanceof Error ? initError.message : "初始化提醒失败"),
       );
@@ -491,6 +512,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleSaveLocalAiSettings = useCallback(async () => {
     await ollamaService.saveSettings(localAiSettings);
+    await memoryService.remember(
+      "preference",
+      "local_ai_enabled",
+      localAiSettings.enabled ? "true" : "false",
+      "local-ai",
+    );
+    if (localAiSettings.selectedModel) {
+      await memoryService.remember(
+        "recent",
+        "recent_model",
+        localAiSettings.selectedModel,
+        "local-ai",
+      );
+    }
     await handleDetectOllama();
   }, [handleDetectOllama, localAiSettings]);
 
@@ -556,14 +591,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (action === "completed") {
         await reminderService.completeReminder(activeReminder);
         setPetState("success");
-      }
-      if (action === "snoozed") {
+      } else if (action === "snoozed") {
         await reminderService.snoozeReminder(activeReminder);
         setPetState("idle");
-      }
-      if (action === "ignored") {
+      } else {
         await reminderService.ignoreReminder(activeReminder);
         setPetState("idle");
+        await memoryService.incrementCounter(
+          `ignored_${activeReminder.reminderType}`,
+          "reminder",
+        );
       }
       setActiveReminder(null);
       setActiveMessage("");
@@ -647,6 +684,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setCommandEvents((current) => ({ ...current, [task.id]: events }));
         setSelectedCommandTaskId(task.id);
         lastOutputAtRef.current[task.id] = Date.now();
+        await memoryService.appendUniqueList(
+          "common_command_types",
+          task.adapterType,
+          "command",
+        );
+        await memoryService.remember(
+          "recent",
+          "recent_working_directory",
+          task.workingDirectory,
+          "command",
+        );
         await commandService.startTask(task);
         await refreshCommandTasks();
       } catch (startError) {
@@ -749,9 +797,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (petId: string) => {
       await petAssetService.setCurrentPet(petId);
       setCurrentPetId(petId === BUILT_IN_PET_ID ? BUILT_IN_PET_ID : petId);
+      await memoryService.remember("preference", "current_pet_id", petId, "pet");
       await refreshPetAssets();
+      await refreshBasicMemories();
     },
-    [refreshPetAssets],
+    [refreshPetAssets, refreshBasicMemories],
   );
 
   const handleDeletePetAsset = useCallback(
@@ -761,6 +811,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [refreshPetAssets],
   );
+
+  const handleDeleteBasicMemory = useCallback(async (id: string) => {
+    await memoryService.delete(id);
+    await refreshBasicMemories();
+  }, [refreshBasicMemories]);
+
+  const completeOnboarding = useCallback(async () => {
+    await memoryService.setOnboardingCompleted(true);
+    await refreshBasicMemories();
+  }, [refreshBasicMemories]);
 
   const value = useMemo<AppContextValue>(
     () => ({
@@ -830,6 +890,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshPetAssets,
       handleSetCurrentPet,
       handleDeletePetAsset,
+      basicMemories,
+      refreshBasicMemories,
+      handleDeleteBasicMemory,
+      showOnboarding,
+      setShowOnboarding,
+      completeOnboarding,
     }),
     [
       currentRoute,
@@ -890,6 +956,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshPetAssets,
       handleSetCurrentPet,
       handleDeletePetAsset,
+      basicMemories,
+      refreshBasicMemories,
+      handleDeleteBasicMemory,
+      showOnboarding,
+      completeOnboarding,
     ],
   );
 

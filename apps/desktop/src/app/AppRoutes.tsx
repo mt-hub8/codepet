@@ -1,9 +1,11 @@
 import { CharactersPage } from "../characters/CharactersPage";
+import { PetHatchWizardPage } from "../characters/hatch/PetHatchWizardPage";
 import { HomePage } from "../home/HomePage";
 import { LocalAiPage } from "../integrations/ollama/LocalAiPage";
 import { RemindersPage } from "../reminders/RemindersPage";
 import { SettingsPage } from "../settings/SettingsPage";
 import { TasksPage } from "../tasks/TasksPage";
+import { WorkStatusPage } from "../work-status/WorkStatusPage";
 import { useApp } from "./AppProvider";
 
 export function AppRoutes() {
@@ -22,6 +24,10 @@ export function AppRoutes() {
       return <TasksPage />;
     case "settings":
       return <SettingsPage />;
+    case "work-status":
+      return <WorkStatusPage />;
+    case "pet-hatch":
+      return <PetHatchWizardPage />;
     default:
       return <HomePage />;
   }

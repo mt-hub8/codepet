@@ -1,6 +1,6 @@
 # Codex / Cursor / Claude Code 接入说明
 
-CodePet V0.4.2 通过轻量 **CLI Wrapper（命令行包装器）** 监控外部 AI Coding Agent，而不是屏幕识别或 IDE 图形界面监听。
+CodePet V0.5 通过轻量 **CLI Wrapper（命令行包装器）** 监控外部 AI Coding Agent。依赖检测可在任务监控页（完整版）或设置页（Lite 版）访问。
 
 ## 核心原则
 
