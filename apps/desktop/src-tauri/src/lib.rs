@@ -18,6 +18,7 @@ mod command_monitor;
 mod agent_tools;
 mod pet_assets;
 mod basic_memory;
+mod diagnostics;
 
 struct WindowState {
     always_on_top: Mutex<bool>,
@@ -917,6 +918,8 @@ pub fn run() {
             basic_memory::list_basic_memory,
             basic_memory::save_basic_memory,
             basic_memory::delete_basic_memory,
+            diagnostics::get_diagnostic_info,
+            diagnostics::open_path_in_explorer,
             start_window_drag,
             get_always_on_top,
             toggle_always_on_top,

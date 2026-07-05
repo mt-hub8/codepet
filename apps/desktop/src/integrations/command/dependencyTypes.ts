@@ -31,4 +31,5 @@ export const AGENT_TOOL_SETTING_KEYS = {
   cursorExecutablePath: "cursor_executable_path",
   claudeCodeExecutablePath: "claude_code_executable_path",
   needsUserInputKeywords: "needs_user_input_keywords",
+  lastDependencyScanAt: "last_dependency_scan_at",
 } as const;

@@ -1128,6 +1128,109 @@
   gap: 8px;
 }
 
+.system-status-hint {
+  display: grid;
+  gap: 8px;
+}
+
+.system-status-hint-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--cp-surface-soft);
+  border: 1px solid var(--cp-border);
+  font-size: 13px;
+}
+
+.dependency-doctor-panel,
+.diagnostics-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.dependency-doctor-group h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.dependency-doctor-actions,
+.diagnostics-actions,
+.settings-actions-row,
+.diagnostics-open-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dependency-doctor-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.dependency-detect-cmd,
+.dependency-problem,
+.dependency-fix {
+  display: block;
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.dependency-problem {
+  color: var(--cp-accent-amber, #b45309);
+}
+
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.diagnostics-grid dt {
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.diagnostics-grid dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.diagnostics-error-row {
+  grid-column: 1 / -1;
+}
+
+.settings-agent-paths {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.settings-agent-paths label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.onboarding-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--cp-text-muted);
+}
+
+.onboarding-ollama-block code {
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--cp-surface-soft);
+  font-size: 12px;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;

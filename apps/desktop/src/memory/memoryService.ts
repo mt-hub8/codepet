@@ -25,6 +25,22 @@ export const memoryService = {
 
   async setOnboardingCompleted(completed: boolean): Promise<void> {
     await this.remember("preference", "onboarding_completed", completed ? "true" : "false", "onboarding");
+    if (completed) {
+      await this.remember("preference", "onboarding_completed_at", new Date().toISOString(), "onboarding");
+    }
+  },
+
+  async setOnboardingSkipped(skipped: boolean): Promise<void> {
+    await this.remember("preference", "onboarding_skipped", skipped ? "true" : "false", "onboarding");
+  },
+
+  async isOnboardingSkipped(): Promise<boolean> {
+    const value = await this.getValue("onboarding_skipped");
+    return value === "true";
+  },
+
+  async getOnboardingCompletedAt(): Promise<string | undefined> {
+    return this.getValue("onboarding_completed_at");
   },
 
   async incrementCounter(key: string, source: string): Promise<void> {

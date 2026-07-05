@@ -1,6 +1,8 @@
 # Codex / Cursor / Claude Code 接入说明
 
-CodePet V0.5 通过轻量 **CLI Wrapper（命令行包装器）** 监控外部 AI Coding Agent。依赖检测可在任务监控页（完整版）或设置页（Lite 版）访问。
+CodePet 通过轻量 **CLI Wrapper（命令行包装器）** 监控外部 AI Coding Agent。**均为可选能力**——未安装不影响提醒与桌宠。
+
+V0.7 起依赖检测集中在 **依赖诊断页**，入口：设置、新手引导、本地 AI 设置、任务监控。
 
 ## 核心原则
 
@@ -29,13 +31,12 @@ CodePet V0.5 通过轻量 **CLI Wrapper（命令行包装器）** 监控外部 A
 
 ## 如何配置 CLI 路径
 
-1. 打开 CodePet → **任务监控**。
-2. 点击 **依赖检测**。
-3. 在 Codex / Cursor / Claude Code 一行填写自定义 CLI 路径（可选）。
-4. 点击 **重新检测** 查看是否可用。
-5. 创建任务时也可在表单中单独填写 **CLI 可执行路径**。
+1. 打开 CodePet → **设置 → Agent 工具**，或 **依赖诊断**。
+2. 在 Codex / Cursor / Claude Code 一行填写自定义 CLI 路径（可选）。
+3. 点击 **重新检测** 查看是否可用。
+4. 创建任务时也可在表单中单独填写 **CLI 可执行路径**。
 
-未安装对应 CLI 时，CodePet 会显示中文友好提示，不会崩溃。
+未安装对应 CLI 时，CodePet 会显示中文友好提示（如「未检测到 Codex CLI，可稍后配置，不影响基础功能」），不会崩溃。
 
 ## 创建 Agent 任务
 

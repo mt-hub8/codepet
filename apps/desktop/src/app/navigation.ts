@@ -6,7 +6,7 @@ export type MainNavRoute =
   | "tasks"
   | "settings";
 
-export type AppRoute = MainNavRoute | "work-status" | "pet-hatch";
+export type AppRoute = MainNavRoute | "work-status" | "pet-hatch" | "dependency-doctor";
 
 export type NavItem = {
   id: MainNavRoute;

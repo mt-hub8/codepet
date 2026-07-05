@@ -1,3 +1,4 @@
+import { DependencyDoctorPage } from "../diagnostics/DependencyDoctorPage";
 import { CharactersPage } from "../characters/CharactersPage";
 import { PetHatchWizardPage } from "../characters/hatch/PetHatchWizardPage";
 import { HomePage } from "../home/HomePage";
@@ -28,6 +29,8 @@ export function AppRoutes() {
       return <WorkStatusPage />;
     case "pet-hatch":
       return <PetHatchWizardPage />;
+    case "dependency-doctor":
+      return <DependencyDoctorPage />;
     default:
       return <HomePage />;
   }

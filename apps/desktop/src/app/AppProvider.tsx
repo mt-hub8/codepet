@@ -124,7 +124,7 @@ type AppContextValue = {
   handleDeleteBasicMemory: (id: string) => Promise<void>;
   showOnboarding: boolean;
   setShowOnboarding: (show: boolean) => void;
-  completeOnboarding: () => Promise<void>;
+  completeOnboarding: (options?: { skipped?: boolean }) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -817,8 +817,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await refreshBasicMemories();
   }, [refreshBasicMemories]);
 
-  const completeOnboarding = useCallback(async () => {
+  const completeOnboarding = useCallback(async (options?: { skipped?: boolean }) => {
     await memoryService.setOnboardingCompleted(true);
+    if (options?.skipped) {
+      await memoryService.setOnboardingSkipped(true);
+    }
     await refreshBasicMemories();
   }, [refreshBasicMemories]);
 

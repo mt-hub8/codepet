@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useApp } from "../../app/AppProvider";
+import { DependencyDoctorPanel } from "../../diagnostics/DependencyDoctorPage";
 import { LocalChatPanel } from "./LocalChatPanel";
 import { OllamaSettingsPanel } from "./OllamaSettingsPanel";
 
@@ -49,15 +50,18 @@ export function LocalAiPage() {
       </div>
 
       {activeTab === "settings" ? (
-        <OllamaSettingsPanel
-          settings={localAiSettings}
-          status={ollamaStatus}
-          isChecking={isCheckingOllama}
-          isRemoteBaseUrl={isRemoteBaseUrl}
-          onSettingsChange={setLocalAiSettings}
-          onSave={handleSaveLocalAiSettings}
-          onDetect={handleDetectOllama}
-        />
+        <>
+          <OllamaSettingsPanel
+            settings={localAiSettings}
+            status={ollamaStatus}
+            isChecking={isCheckingOllama}
+            isRemoteBaseUrl={isRemoteBaseUrl}
+            onSettingsChange={setLocalAiSettings}
+            onSave={handleSaveLocalAiSettings}
+            onDetect={handleDetectOllama}
+          />
+          <DependencyDoctorPanel compact />
+        </>
       ) : (
         <LocalChatPanel
           settings={localAiSettings}

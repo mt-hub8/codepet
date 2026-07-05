@@ -2,34 +2,34 @@
 
 CodePet V0.6 起通过 **GitHub Actions** 构建 Windows 安装包，并发布到 **GitHub Releases**。
 
-当前版本：**v0.6.0 Local Alpha**（本地 Alpha 预发布，不保证完全稳定）。
+当前版本：**v0.7.0 Local Alpha**（本地 Alpha 预发布，不保证完全稳定）。
 
 ---
 
 ## 版本定位
 
-**CodePet v0.6.0 Local Alpha**
+**CodePet v0.7.0 Local Alpha**
 
 CodePet 是一个本地优先的 AI 桌面伙伴。当前安装包为 **Local Alpha** 版本，适合愿意尝鲜的 Windows 用户。不需要 clone 代码、不需要 pnpm、不需要 Tauri 开发环境即可体验。
 
 ### 主要功能
 
 - 桌宠悬浮窗口
-- 本地提醒和自定义提示音
-- Ollama 本地 AI
-- 命令 / Agent 任务监控（Codex / Cursor / Claude Code 轻量适配）
+- 本地提醒和自定义提示音（零配置）
+- 首次启动引导与依赖诊断
+- Ollama 本地 AI（可选）
+- 命令 / Agent 任务监控（Codex / Cursor / Claude Code 轻量适配，可选）
 - 宠物素材导入（pet.json + spritesheet）
 - 宠物孵化提示词向导
 - 工作状态中心
 - 基础行为记忆
-- 新手引导 Lite
 
 ---
 
 ## 下载方式
 
 1. 打开本仓库 **GitHub → Releases** 页面。
-2. 选择最新版本（例如 `v0.6.0`）。
+2. 选择最新版本（例如 `v0.7.0`）。
 3. **Windows 用户**下载以下任一安装包：
    - **推荐**：`CodePet_*_x64_en-US.msi`（WiX MSI 安装包）
    - **备选**：`CodePet_*_x64-setup.exe`（NSIS 安装程序）

@@ -2,6 +2,18 @@
 
 所有重要变更会记录在这个文件中。
 
+## 0.7.0
+
+- 新增 8 步首次启动引导：说明零配置功能与可选依赖，每步可跳过。
+- 引导状态保存：`onboarding_completed`、`onboarding_completed_at`、`onboarding_skipped`。
+- 新增依赖诊断页：Git、Node.js、pnpm、Ollama、Agent CLI 与应用环境。
+- 新增诊断信息区域：复制脱敏报告、打开数据/日志目录、重新检测、清除检测缓存。
+- 统一常见依赖错误中文提示。
+- 设置页分组：基础、本地 AI、Agent、宠物、隐私与数据。
+- 首页轻量系统状态提示（最多 2 条）。
+- 更新 README、快速开始、安装、Ollama、Agent、隐私、路线图、发布文档。
+- 不新增核心业务功能；不自动安装依赖、不保存 API Key。
+
 ## 0.6.0
 
 - 新增 GitHub Actions `release.yml`：支持 tag `v*` 与 `workflow_dispatch` 触发 Windows 安装包构建。

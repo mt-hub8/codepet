@@ -1,6 +1,10 @@
 # Ollama 设置
 
-Ollama 是 CodePet V0.3 使用的本地模型运行方式。CodePet 不会自动安装 Ollama，也不会自动下载模型。
+Ollama 是 CodePet 使用的**可选**本地模型运行方式。CodePet **不会**自动安装 Ollama，也不会自动下载模型。
+
+**没有 Ollama 时**，提醒、桌宠、提示音与宠物导入仍可正常使用。
+
+V0.7 起可在 **设置 → 依赖诊断** 或新手引导第 5 步检测 Ollama 状态。
 
 ## 安装 Ollama
 
@@ -32,7 +36,13 @@ ollama list
 http://localhost:11434/api/tags
 ```
 
-如果 CodePet 显示未检测到 Ollama，请确认 Ollama 已安装并正在运行。
+如果 CodePet 显示未检测到 Ollama，请确认 Ollama 已安装并正在运行。也可在 **依赖诊断** 页点击「重新检测」。
+
+常见提示：
+
+- **未检测到 Ollama**：不影响提醒与桌宠；安装后重新检测即可。
+- **Ollama 已安装但未运行**：启动 Ollama 应用后重新检测。
+- **没有本地模型**：在终端运行 `ollama pull qwen3:0.6b`。
 
 ## 拉取推荐模型
 
