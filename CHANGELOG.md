@@ -4,7 +4,29 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
-## 1.0.0 — CodePet v1.0 Public Beta
+## 1.0.0-beta.1 — CodePet v1.0.0-beta.1 Public Beta（Release Candidate）
+
+**第一个公开 Beta 发布候选**。不新增核心业务功能。
+
+### 发布准备
+
+- 版本：代码 `1.0.0`，标签 `v1.0.0-beta.1`
+- `docs/release.md`：beta.1 Release Notes 与人工发布步骤
+- `release.yml`：更新为 Public Beta 文案，支持 `v1.0.0-beta.1` tag
+- README：beta.1 标注；截图改为占位表（避免 broken image）
+- `tauri.conf.json`：安装包描述更新为 Public Beta
+
+### 验收
+
+- `pnpm --filter @codepet/desktop build` 通过
+- `pnpm tauri build` 需在已安装 Rust 的环境验证（CI release workflow 可构建）
+
+### 说明
+
+- 不自动打 tag / 发布 Release
+- Windows 安装包仍未代码签名
+
+## 1.0.0 — CodePet v1.0 Public Beta Readiness
 
 **公开 Beta 发布准备**。本版本不新增核心业务功能，聚焦文档、模板、验收与开源项目包装。
 

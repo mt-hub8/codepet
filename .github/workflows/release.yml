@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag（例如 v0.6.0）"
+        description: "Release tag（例如 v1.0.0-beta.1）"
         required: true
         type: string
   push:
@@ -49,11 +49,13 @@ jobs:
         with:
           projectPath: apps/desktop
           tagName: ${{ github.event.inputs.tag || github.ref_name }}
-          releaseName: CodePet ${{ github.event.inputs.tag || github.ref_name }} Local Alpha
+          releaseName: CodePet ${{ github.event.inputs.tag || github.ref_name }} Public Beta
           releaseBody: |
-            ## CodePet ${{ github.event.inputs.tag || github.ref_name }} Local Alpha
+            # CodePet v1.0.0-beta.1 Public Beta
 
-            本版本为**本地 Alpha 预发布**版本，适合愿意尝鲜的 Windows 用户。
+            **CodePet** 是一个本地优先的 AI 桌面伙伴，用桌宠提醒用户处理提醒、任务、休息、本地 AI 和 Coding Agent 状态。
+
+            默认不上传你的代码、命令日志、聊天、提醒、宠物素材与基础记忆。
 
             ### 下载（Windows）
             - **推荐**：`.msi` 安装包（WiX）
@@ -64,23 +66,28 @@ jobs:
             ### 主要功能
             - 桌宠悬浮窗口
             - 本地提醒与自定义提示音
-            - Ollama 本地 AI
-            - 命令 / Agent 任务监控
+            - Ollama 本地 AI（可选）
+            - 命令任务监控
+            - Codex / Cursor / Claude Code 轻量接管提醒
+            - 等待确认检测与长时间无输出检测
             - 宠物素材导入与孵化提示词向导
             - 工作状态中心与基础行为记忆
-            - 新手引导 Lite
+            - 首次启动引导与依赖诊断
 
             ### 安装提示
-            - 当前**未代码签名**，Windows 可能提示未知发布者，请选择「更多信息」后继续
-            - 请仅从本项目 GitHub Releases 下载，不要从第三方来源下载
-
-            ### 已知问题
-            - Ollama、Codex、Cursor、Claude Code 需用户自行安装与配置
-            - 宠物素材版权由用户自行确认
-            - Alpha 版本可能存在兼容性问题
+            - 当前为 **Public Beta**，**未代码签名**，Windows 可能提示未知发布者 →「更多信息」→「仍要运行」
+            - 请仅从本项目 GitHub Releases 下载
 
             ### 隐私
-            默认本地运行，不上传用户代码、命令、日志、聊天、提醒、宠物素材与基础记忆。详见 [docs/privacy.md](https://github.com/${{ github.repository }}/blob/main/docs/privacy.md)。
+            默认本地运行。远程 Ollama 与外部 Agent 工具有各自数据策略。详见 [docs/privacy.md](https://github.com/${{ github.repository }}/blob/main/docs/privacy.md)。
+
+            ### 已知问题
+            见 [docs/known-issues.md](https://github.com/${{ github.repository }}/blob/main/docs/known-issues.md)。
+
+            ### 反馈
+            - [Bug 报告](https://github.com/${{ github.repository }}/issues/new?template=bug_report.yml)
+            - [功能建议](https://github.com/${{ github.repository }}/issues/new?template=feature_request.yml)
+            - [宠物素材问题](https://github.com/${{ github.repository }}/issues/new?template=pet_asset_issue.yml)
 
             完整变更见 [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)。
           releaseDraft: true

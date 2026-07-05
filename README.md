@@ -6,25 +6,25 @@
 
 **CodePet 是一个本地优先的 AI 桌面伙伴**，用桌宠提醒你处理任务、休息、学习、本地 AI 和 Coding Agent 状态。
 
-> **CodePet v1.0 Public Beta** — Windows 优先公开测试版。未代码签名，安装时可能出现「未知发布者」提示。macOS / Linux 暂未正式支持安装包。
+> **CodePet v1.0.0-beta.1 Public Beta** — Windows 优先公开测试版。应用内版本号 `1.0.0`。未代码签名，安装时可能出现「未知发布者」提示。macOS / Linux 暂未正式支持安装包。
 
 ---
 
 ## 截图
 
-> 截图文件需人工补充，见 [docs/demo.md](docs/demo.md) 中的截图清单。
+> **发布前待补充**：以下 PNG 尚未入库，避免 broken image，请按 [docs/demo.md](docs/demo.md) 人工截图后放入 `docs/assets/screenshots/`。
 
-| 首页 | 新手引导 | 提醒 |
-|:---:|:---:|:---:|
-| ![首页](docs/assets/screenshots/home.png) | ![新手引导](docs/assets/screenshots/onboarding.png) | ![提醒](docs/assets/screenshots/reminders.png) |
+| 页面 | 文件路径 | 状态 |
+|------|----------|------|
+| 首页 | `docs/assets/screenshots/home.png` | 待补充 |
+| 新手引导 | `docs/assets/screenshots/onboarding.png` | 待补充 |
+| 提醒 | `docs/assets/screenshots/reminders.png` | 待补充 |
+| 本地 AI | `docs/assets/screenshots/local-ai.png` | 待补充 |
+| 任务监控 | `docs/assets/screenshots/command-monitor.png` | 待补充 |
+| 依赖诊断 | `docs/assets/screenshots/dependency-doctor.png` | 待补充 |
+| 宠物素材库 | `docs/assets/screenshots/pet-library.png` | 待补充 |
 
-| 本地 AI | 任务监控 | 依赖诊断 |
-|:---:|:---:|:---:|
-| ![本地 AI](docs/assets/screenshots/local-ai.png) | ![任务监控](docs/assets/screenshots/command-monitor.png) | ![依赖诊断](docs/assets/screenshots/dependency-doctor.png) |
-
-| 宠物素材库 |
-|:---:|
-| ![宠物素材库](docs/assets/screenshots/pet-library.png) |
+补充截图后，可在本表下方恢复 `![描述](docs/assets/screenshots/xxx.png)` 引用。
 
 ---
 

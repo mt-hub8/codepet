@@ -7,6 +7,7 @@ target
 *.log
 *.sqlite
 *.db
+*.sqlite-journal
 models/
 logs/
 sounds/

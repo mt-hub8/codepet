@@ -29,7 +29,7 @@
     "active": true,
     "targets": ["msi", "nsis"],
     "shortDescription": "本地优先 AI 桌面伙伴",
-    "longDescription": "CodePet 是一个本地优先的 AI 桌面伙伴。当前为 Local Alpha 版本。",
+    "longDescription": "CodePet 是一个本地优先的 AI 桌面伙伴。当前为 v1.0.0-beta.1 Public Beta。",
     "windows": {
       "wix": {
         "language": "zh-CN"

@@ -2,7 +2,7 @@
 
 本文面向**已安装 CodePet Windows 安装包**的普通用户。开发者请见 [install.md](install.md)。
 
-CodePet 当前为 **V1.0 Public Beta** 版本。
+CodePet 当前为 **CodePet v1.0.0-beta.1 Public Beta**（应用内版本号 `1.0.0`）。
 
 ---
 

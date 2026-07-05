@@ -6,13 +6,13 @@ CodePet 从轻量桌宠骨架逐步扩展到本地 AI、Agent 监控与社区生
 
 ## V1.0 Public Beta Readiness（已完成）
 
-**CodePet v1.0 Public Beta** — 公开 Beta 发布准备，不新增核心功能。
+**CodePet v1.0.0-beta.1 Public Beta** — 公开 Beta 发布准备与 Release Candidate。
 
 - README 公开展示首屏、下载入口、隐私与限制说明
 - Demo 文档、QA 清单、已知问题
 - Issue / PR 模板、CONTRIBUTING、SECURITY
 - 截图目录占位与 Release Notes 模板
-- 版本号 `1.0.0`，文档标注 Public Beta
+- 版本号 `1.0.0`，标签 `v1.0.0-beta.1`，文档标注 **CodePet v1.0.0-beta.1 Public Beta**
 
 ---
 
