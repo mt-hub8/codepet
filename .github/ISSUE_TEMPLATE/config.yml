@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: README 与快速开始
+    url: https://github.com/mt-hub8/codepet#readme
+    about: 项目首页、下载与上手说明
+  - name: 安装说明
+    url: https://github.com/mt-hub8/codepet/blob/main/docs/install.md
+    about: Windows 安装与卸载
+  - name: 隐私说明
+    url: https://github.com/mt-hub8/codepet/blob/main/docs/privacy.md
+    about: 数据存储与不上传承诺
+  - name: 已知问题
+    url: https://github.com/mt-hub8/codepet/blob/main/docs/known-issues.md
+    about: Public Beta 限制与常见问题
+  - name: 安全问题
+    url: https://github.com/mt-hub8/codepet/blob/main/SECURITY.md
+    about: 请勿在公开 Issue 披露安全漏洞细节

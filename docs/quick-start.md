@@ -2,7 +2,7 @@
 
 本文面向**已安装 CodePet Windows 安装包**的普通用户。开发者请见 [install.md](install.md)。
 
-CodePet 当前为 **V0.7 Local Alpha** 版本。
+CodePet 当前为 **V1.0 Public Beta** 版本。
 
 ---
 
@@ -97,4 +97,6 @@ pnpm tauri dev
 
 当前安装包为 Local Alpha。Windows 可能提示未知发布者；请从官方 GitHub Releases 下载。
 
-V1.0 目标为 **Public Beta**，将重点放在稳定性与公开展示，而非继续堆功能。
+V1.0 目标为 **Public Beta**。将重点放在稳定性、文档与反馈收集。
+
+已知问题见 [known-issues.md](known-issues.md)。

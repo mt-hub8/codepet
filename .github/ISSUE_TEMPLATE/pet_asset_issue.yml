@@ -1,0 +1,67 @@
+name: 宠物素材问题
+description: 报告 pet.json / spritesheet 导入或显示问题
+title: "[Pet] "
+labels: ["pet-asset"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **版权提醒**：请勿上传无授权的第三方角色素材。`pet.json` 可脱敏后粘贴。
+        格式说明见 [角色系统文档](https://github.com/mt-hub8/codepet/blob/main/docs/character-system.md)。
+
+  - type: dropdown
+    id: import_method
+    attributes:
+      label: 导入方式
+      options:
+        - 角色页 → 导入宠物文件夹
+        - 从孵化向导跳转导入
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: pet_json
+    attributes:
+      label: pet.json 内容（请脱敏）
+      description: 可删除私人路径、作者信息等。不要上传无版权素材的完整描述若涉及第三方 IP。
+      render: json
+
+  - type: dropdown
+    id: spritesheet_format
+    attributes:
+      label: spritesheet 格式
+      options:
+        - spritesheet.png
+        - spritesheet.webp
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: image_size
+    attributes:
+      label: 图片尺寸
+      placeholder: "例如 1536x1872"
+
+  - type: textarea
+    id: error_message
+    attributes:
+      label: 错误提示
+      description: CodePet 界面显示的完整错误信息
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: license_confirm
+    attributes:
+      label: 素材授权确认
+      options:
+        - label: 我确认对该宠物素材拥有使用授权，或素材为本人原创 / 项目占位素材
+          required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 其他说明
+      description: 预览异常、动画状态、网格配置等

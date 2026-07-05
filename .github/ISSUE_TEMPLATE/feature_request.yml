@@ -1,0 +1,54 @@
+name: 功能建议
+description: 提议新功能或体验改进
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Public Beta 阶段优先稳定性与文档。新功能建议欢迎讨论，但可能不会立即实现。
+        请先查看 [路线图](https://github.com/mt-hub8/codepet/blob/main/docs/roadmap.md)。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题
+      description: 你遇到了什么痛点或使用场景？
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望功能
+      description: 你希望 CodePet 如何帮助你？
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 当前替代方案
+      description: 你现在如何解决这个问题？
+
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: 是否愿意参与实现
+      options:
+        - 愿意提交 PR
+        - 愿意测试但不做开发
+        - 仅提出建议
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 对你而言的优先级
+      options:
+        - 高 — 影响日常使用
+        - 中 — 有更好体验
+        - 低 — 锦上添花
+    validations:
+      required: true

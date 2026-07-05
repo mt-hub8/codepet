@@ -1,0 +1,116 @@
+name: Bug 报告
+description: 报告 CodePet 中可复现的问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先查看 [已知问题](https://github.com/mt-hub8/codepet/blob/main/docs/known-issues.md) 与 [快速开始](https://github.com/mt-hub8/codepet/blob/main/docs/quick-start.md)。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 简要说明遇到的问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请列出可复现的步骤
+      placeholder: |
+        1. 打开 CodePet
+        2. 进入…
+        3. 点击…
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图
+      description: 如有请粘贴或拖拽截图（注意脱敏）
+
+  - type: input
+    id: version
+    attributes:
+      label: CodePet 版本
+      placeholder: "例如 1.0.0 Public Beta"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+        - Linux
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installer
+    attributes:
+      label: 是否安装包版本
+      options:
+        - 是（GitHub Releases 安装包）
+        - 否（pnpm tauri dev 源码运行）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ollama_status
+    attributes:
+      label: Ollama 状态
+      options:
+        - 未安装
+        - 已安装未启动
+        - 已安装已启动，无模型
+        - 已安装已启动，有模型
+        - 使用远程 Ollama 地址
+        - 未使用本地 AI
+    validations:
+      required: true
+
+  - type: textarea
+    id: agent_status
+    attributes:
+      label: Agent CLI 状态
+      description: Codex / Cursor / Claude Code 是否安装、是否配置自定义路径
+      placeholder: |
+        - Codex：未安装
+        - Cursor：已配置路径 C:\...\cursor.exe
+        - Claude Code：未使用
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 脱敏诊断信息
+      description: 设置页 → 复制诊断信息（已脱敏）。请勿粘贴完整路径或聊天记录。
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志片段
+      description: 请脱敏后粘贴相关日志。不要包含 API Key、Token 或完整命令输出。

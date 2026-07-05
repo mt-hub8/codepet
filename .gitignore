@@ -17,6 +17,7 @@ appData/
 chat-records/
 local-chat/
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
 apps/desktop/src-tauri/gen/

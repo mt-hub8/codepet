@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "CodePet",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "identifier": "dev.codepet.app",
   "build": {
     "beforeDevCommand": "pnpm dev",

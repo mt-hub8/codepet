@@ -2,6 +2,34 @@
 
 所有重要变更会记录在这个文件中。
 
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
+
+## 1.0.0 — CodePet v1.0 Public Beta
+
+**公开 Beta 发布准备**。本版本不新增核心业务功能，聚焦文档、模板、验收与开源项目包装。
+
+### 新增
+
+- README 公开展示首屏：定位、功能、下载、隐私、限制、反馈入口
+- `docs/demo.md` — 3 / 10 分钟演示路线与截图清单
+- `docs/qa-checklist.md` — 发布前 QA 验收清单
+- `docs/known-issues.md` — 已知问题与 Beta 限制
+- `CONTRIBUTING.md`、`SECURITY.md`
+- GitHub Issue 模板（Bug、功能建议、宠物素材）与 PR 模板
+- `docs/assets/screenshots/` 截图目录与占位说明
+- V1.0 Public Beta Release Notes 模板（`docs/release.md`）
+
+### 变更
+
+- 版本号统一为 `1.0.0`（文档标注 **CodePet v1.0 Public Beta**）
+- `docs/roadmap.md` 收敛后续大阶段（V1.1 / V1.5 / V2.0 / V3.0）
+- `docs/privacy.md` 最终检查与补充
+
+### 说明
+
+- 不新增核心功能；不自动打 tag / 发布 Release
+- Windows 安装包仍未代码签名
+
 ## 0.7.0
 
 - 新增 8 步首次启动引导：说明零配置功能与可选依赖，每步可跳过。

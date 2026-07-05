@@ -1,6 +1,6 @@
 # 安装说明
 
-CodePet V0.6 起提供 **Windows 安装包**（GitHub Releases）。V0.7 完善首次引导与依赖诊断。本文区分普通用户安装与开发者本地运行。
+CodePet V0.6 起提供 **Windows 安装包**。当前为 **V1.0 Public Beta**。
 
 ---
 
