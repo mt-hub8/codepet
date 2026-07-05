@@ -65,7 +65,7 @@ pub fn detect_executable(executable: String, args: Vec<String>) -> DetectExecuta
     process.stdout(Stdio::piped()).stderr(Stdio::piped());
 
     match process.spawn() {
-        Ok(mut child) => match child.wait_with_output() {
+        Ok(child) => match child.wait_with_output() {
             Ok(output) => {
                 let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
                 let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();

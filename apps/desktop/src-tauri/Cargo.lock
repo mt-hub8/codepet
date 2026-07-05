@@ -341,7 +341,7 @@ dependencies = [
 
 [[package]]
 name = "codepet-desktop"
-version = "0.3.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "reqwest 0.12.28",

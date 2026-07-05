@@ -393,8 +393,9 @@ pub fn start_command_task(
     if let Some(stdout) = stdout {
         thread::spawn(move || {
             let reader = BufReader::new(stdout);
+            let db_state = app_stdout.state::<DbState>();
             for line in reader.lines().map_while(Result::ok) {
-                if let Ok(conn) = app_stdout.state::<DbState>().conn.lock() {
+                if let Ok(conn) = db_state.conn.lock() {
                     let _ = add_event(
                         &conn,
                         &app_stdout,
@@ -413,8 +414,9 @@ pub fn start_command_task(
     if let Some(stderr) = stderr {
         thread::spawn(move || {
             let reader = BufReader::new(stderr);
+            let db_state = app_stderr.state::<DbState>();
             for line in reader.lines().map_while(Result::ok) {
-                if let Ok(conn) = app_stderr.state::<DbState>().conn.lock() {
+                if let Ok(conn) = db_state.conn.lock() {
                     let _ = add_event(
                         &conn,
                         &app_stderr,
@@ -431,7 +433,8 @@ pub fn start_command_task(
     let app_wait = app.clone();
     thread::spawn(move || {
         let exit = {
-            let mut running = match app_wait.state::<CommandRunnerState>().running.lock() {
+            let runner_state = app_wait.state::<CommandRunnerState>();
+            let mut running = match runner_state.running.lock() {
                 Ok(value) => value,
                 Err(_) => return,
             };
@@ -439,7 +442,8 @@ pub fn start_command_task(
             child.as_mut().and_then(|process| process.wait().ok())
         };
 
-        let Ok(conn) = app_wait.state::<DbState>().conn.lock() else {
+        let db_state = app_wait.state::<DbState>();
+        let Ok(conn) = db_state.conn.lock() else {
             return;
         };
 
