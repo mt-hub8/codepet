@@ -1,0 +1,389 @@
+.home-page {
+  display: grid;
+  gap: 28px;
+  max-width: 1120px;
+}
+
+.home-greeting {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 8px;
+}
+
+.home-greeting-copy h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--cp-text-primary);
+}
+
+.home-greeting-copy p {
+  margin: 10px 0 0;
+  font-size: 15px;
+  color: var(--cp-text-secondary);
+}
+
+.home-pet-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 220px;
+  padding: 16px 20px;
+  border: 1px solid var(--cp-border);
+  border-radius: 22px;
+  background: var(--cp-surface);
+  box-shadow: var(--cp-shadow-subtle);
+}
+
+.home-pet-card-visual {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.home-pet-card-visual .active-pet-renderer,
+.home-pet-card-visual .sprite-pet-renderer {
+  transform-origin: center;
+}
+
+.home-pet-card-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.home-pet-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cp-text-primary);
+}
+
+.home-pet-online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cp-accent-green);
+}
+
+.home-pet-subline {
+  font-size: 13px;
+  color: var(--cp-text-muted);
+}
+
+.home-section {
+  display: grid;
+  gap: 18px;
+}
+
+.home-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.home-section-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--cp-text-primary);
+}
+
+.home-link-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--cp-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.home-link-btn:hover {
+  color: var(--cp-text-secondary);
+}
+
+.home-primary-chip {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cp-accent-green-soft);
+  color: var(--cp-accent-green);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-primary-chip:hover {
+  background: #e4f2e5;
+}
+
+.home-reminder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.home-reminder-card {
+  display: flex;
+  gap: 14px;
+  min-height: 132px;
+  padding: 20px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-card);
+  background: var(--cp-surface);
+  box-shadow: var(--cp-shadow-subtle);
+}
+
+.home-reminder-card-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+}
+
+.home-reminder-card--green .home-reminder-card-icon {
+  background: var(--cp-accent-green-soft);
+  color: var(--cp-accent-green);
+}
+
+.home-reminder-card--blue .home-reminder-card-icon {
+  background: var(--cp-accent-blue-soft);
+  color: var(--cp-accent-blue);
+}
+
+.home-reminder-card--amber .home-reminder-card-icon {
+  background: var(--cp-accent-amber-soft);
+  color: var(--cp-accent-amber);
+}
+
+.home-reminder-card-body {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.home-reminder-card-body strong {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--cp-text-primary);
+}
+
+.home-reminder-card-body p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cp-text-secondary);
+}
+
+.home-reminder-card-footer {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.home-role-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.home-role-card {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-card);
+  background: var(--cp-surface);
+  box-shadow: var(--cp-shadow-subtle);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.home-role-card:hover {
+  box-shadow: var(--cp-shadow-soft);
+  transform: translateY(-1px);
+}
+
+.home-role-card-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+}
+
+.home-role-card h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.home-role-card p {
+  margin: 0;
+  min-height: 40px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cp-text-secondary);
+}
+
+.home-role-card-scope,
+.home-role-card-tools {
+  display: grid;
+  gap: 8px;
+}
+
+.home-role-scope-label,
+.home-role-tools-label {
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.home-role-scope-pill {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.home-role-tool-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.home-role-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: var(--cp-surface-soft);
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+}
+
+.home-task-panel {
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-card);
+  background: var(--cp-surface);
+  box-shadow: var(--cp-shadow-subtle);
+  overflow: hidden;
+}
+
+.home-task-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+}
+
+.home-task-row--divider {
+  border-bottom: 1px solid #f0ebe3;
+}
+
+.home-task-row-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.home-task-row-main strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.home-task-row-main span {
+  font-size: 13px;
+  color: var(--cp-text-muted);
+}
+
+.home-task-status-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.home-task-status-icon--success {
+  background: var(--cp-accent-green-soft);
+  color: var(--cp-accent-green);
+}
+
+.home-task-status-icon--amber {
+  background: var(--cp-accent-amber-soft);
+  color: var(--cp-accent-amber);
+}
+
+.home-task-status-icon--danger {
+  background: var(--cp-danger-soft);
+  color: var(--cp-danger);
+}
+
+.home-task-status-text {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.home-task-status-text--succeeded {
+  color: var(--cp-accent-green);
+}
+
+.home-task-status-text--needs_user_input,
+.home-task-status-text--no_output_timeout,
+.home-task-status-text--running,
+.home-task-status-text--pending {
+  color: var(--cp-accent-amber);
+}
+
+.home-task-status-text--failed,
+.home-task-status-text--cancelled {
+  color: var(--cp-danger);
+}
+
+@media (max-width: 1100px) {
+  .home-reminder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-role-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-greeting {
+    flex-direction: column;
+  }
+
+  .home-pet-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-task-row {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .home-task-status-text,
+  .home-task-row .home-link-btn {
+    justify-self: start;
+  }
+}

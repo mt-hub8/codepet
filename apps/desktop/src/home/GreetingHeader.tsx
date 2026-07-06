@@ -7,12 +7,12 @@ export function GreetingHeader() {
   const greeting = getTimeGreeting();
 
   return (
-    <header className="greeting-header">
-      <div>
+    <header className="home-greeting">
+      <div className="home-greeting-copy">
         <h1>
-          {greeting}，{USER_NAME}
+          {greeting}，{USER_NAME} 👋
         </h1>
-        <p>今天也由 CodePet 陪你高效编码</p>
+        <p>今天也由 CodePet 陪你高效编码 ✨</p>
       </div>
       <PetStatusCard />
     </header>

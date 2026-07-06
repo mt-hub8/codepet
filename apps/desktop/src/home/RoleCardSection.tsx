@@ -2,30 +2,34 @@ import { defaultRolePresets } from "../characters/rolePresets";
 import { roleAccentMap } from "../design/theme";
 import { memoryScopeLabel } from "../shared/utils/memoryScopeLabel";
 import { useApp } from "../app/AppProvider";
+import { RoleCardIcon } from "./HomeIcons";
+
+function formatTools(tools: string[]): { visible: string[]; extra: number } {
+  const visible = tools.slice(0, 3);
+  const extra = Math.max(0, tools.length - 3);
+  return { visible, extra };
+}
 
 export function RoleCardSection() {
   const { navigate } = useApp();
 
   return (
-    <section className="cp-section" aria-label="自定义角色">
-      <div className="cp-section-header">
-        <div>
-          <h2>自定义角色</h2>
-          <p>轻量角色预设，完整角色工作室将在后续版本开放</p>
-        </div>
-        <button type="button" className="cp-btn cp-btn-ghost cp-btn-sm" onClick={() => navigate("characters")}>
-          查看全部
+    <section className="home-section" aria-label="自定义角色">
+      <div className="home-section-header">
+        <h2>自定义角色</h2>
+        <button type="button" className="home-primary-chip" onClick={() => navigate("characters")}>
+          + 快速新建角色
         </button>
       </div>
 
-      <div className="role-card-grid">
+      <div className="home-role-grid">
         {defaultRolePresets.map((role) => {
           const accent = roleAccentMap[role.accent];
+          const { visible, extra } = formatTools(role.tools);
           return (
             <article
               key={role.id}
-              className="cp-card role-card"
-              style={{ borderColor: accent.soft }}
+              className="home-role-card"
               onClick={() => navigate("characters")}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -35,16 +39,29 @@ export function RoleCardSection() {
               role="button"
               tabIndex={0}
             >
+              <div
+                className="home-role-card-icon"
+                style={{ background: accent.soft, color: accent.color }}
+              >
+                <RoleCardIcon accent={role.accent} />
+              </div>
               <h3>{role.name}</h3>
               <p>{role.description}</p>
-              <div className="role-card-footer">
-                <span className="cp-tag cp-tag-muted">{memoryScopeLabel(role.memoryScope)}</span>
-                <div className="role-card-tools">
-                  {role.tools.map((tool) => (
-                    <span key={tool} className="cp-tag" style={{ background: accent.soft, color: accent.color }}>
+              <div className="home-role-card-scope">
+                <span className="home-role-scope-label">记忆范围：</span>
+                <span className="home-role-scope-pill" style={{ background: accent.soft, color: accent.color }}>
+                  {memoryScopeLabel(role.memoryScope)}
+                </span>
+              </div>
+              <div className="home-role-card-tools">
+                <span className="home-role-tools-label">擅长工具：</span>
+                <div className="home-role-tool-icons">
+                  {visible.map((tool) => (
+                    <span key={tool} className="home-role-tool-chip">
                       {tool}
                     </span>
                   ))}
+                  {extra > 0 && <span className="home-role-tool-chip">+{extra}</span>}
                 </div>
               </div>
             </article>
